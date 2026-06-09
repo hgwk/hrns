@@ -4,6 +4,10 @@ export function createAudit(name) {
     fail(message, detail = '') {
       findings.push({ message, detail })
     },
+    warn(message, detail = '') {
+      console.error(`${name}: WARN - ${message}`)
+      if (detail) console.error(`  ${detail}`)
+    },
     finish() {
       if (findings.length === 0) {
         console.log(`${name}: PASS`)
@@ -21,4 +25,20 @@ export function createAudit(name) {
 
 export function unique(values) {
   return [...new Set(values)].sort()
+}
+
+export function finishByMode(audit, findings, mode = 'fail') {
+  if (findings.length === 0) {
+    audit.finish()
+    return
+  }
+  if (mode === 'off') {
+    console.log('audit disabled by config')
+    return
+  }
+  for (const finding of findings) {
+    if (mode === 'warn') audit.warn(finding.message, finding.detail)
+    else audit.fail(finding.message, finding.detail)
+  }
+  audit.finish()
 }

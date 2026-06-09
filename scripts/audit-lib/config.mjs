@@ -38,6 +38,50 @@ const DEFAULT_CONFIG = {
     extraEntrypoints: [],
     alwaysAllowedPatterns: [],
   },
+  workflow: {
+    mode: 'warn',
+    todoPath: 'tasks/todo.json',
+    lessonsPath: 'tasks/lessons.json',
+  },
+  proof: {
+    mode: 'warn',
+    roots: ['tasks/todo.json', 'ledger/worklog.jsonl', 'README.md'],
+    terms: ['verification', '검증', 'evidence', 'commands'],
+  },
+  rootCause: {
+    mode: 'warn',
+    sources: ['tasks/todo.json', 'ledger/worklog.jsonl'],
+    requiredTerms: ['root cause', 'impact', 'why missed', 'verification'],
+  },
+  agentInstructions: {
+    mode: 'warn',
+    files: ['AGENTS.md', 'CLAUDE.md', '.cduo/orchestration.md', '.ldgr/instructions.md'],
+    minRepeatedWords: 24,
+  },
+  docsDuplication: {
+    mode: 'warn',
+    roots: ['docs', 'README.md'],
+    threshold: 0.72,
+    minTokens: 80,
+  },
+  mainDiff: {
+    mode: 'warn',
+    base: 'main',
+    maxFiles: 40,
+    maxChangedLines: 1200,
+  },
+  stopRule: {
+    mode: 'warn',
+    logPaths: ['tasks/todo.json', 'tasks/failures.log'],
+    repeatedFailureThreshold: 2,
+  },
+  elegance: {
+    mode: 'warn',
+    base: 'main',
+    maxNewFiles: 20,
+    maxLargeFiles: 4,
+    largeFileLineThreshold: 250,
+  },
 }
 
 let cachedConfig

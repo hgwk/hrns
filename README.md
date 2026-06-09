@@ -12,7 +12,7 @@ From another project:
 
 ```sh
 pnpm add -D @hgwk/hrns
-pnpm hrns init
+pnpm hrns init --tasks
 pnpm hrns list
 pnpm hrns audit
 ```
@@ -31,6 +31,12 @@ Create `hrns.config.json` with:
 
 ```sh
 pnpm hrns init
+```
+
+Create JSON task files with:
+
+```sh
+pnpm hrns init --tasks
 ```
 
 The CLI also reads `package.json#hrns`. `hrns.config.json` wins over
@@ -59,9 +65,23 @@ Useful keys:
     "requiredRootScripts": ["ci", "audit"],
     "docsRoots": ["docs", "README.md"],
     "packageJsonRoots": ["package.json", "packages"]
+  },
+  "workflow": {
+    "mode": "warn",
+    "todoPath": "tasks/todo.json",
+    "lessonsPath": "tasks/lessons.json"
+  },
+  "docsDuplication": {
+    "mode": "fail",
+    "roots": ["docs", "README.md"],
+    "threshold": 0.72
   }
 }
 ```
+
+`mode` may be `fail`, `warn`, or `off`. Workflow state is JSON by default;
+`tasks/todo.json` and `tasks/lessons.json` are intended to be machine-readable
+agent coordination files, not prose scratchpads.
 
 ## Audit Sets
 
@@ -81,9 +101,21 @@ they should be treated as universally portable:
 - `verify-env-example-symbol-sync.mjs`
 - `verify-closed-world.mjs`
 - `verify-operational-surface.mjs`
+- `verify-agent-instruction-drift.mjs`
+- `verify-docs-duplication.mjs`
+- `verify-task-workflow.mjs`
+- `verify-proof-record.mjs`
+- `verify-root-cause-record.mjs`
+- `verify-main-diff-scope.mjs`
+- `verify-stop-rule.mjs`
+- `verify-elegance-review.mjs`
 - `ledger-verify.mjs`
 - `upstream-drift-check.mjs`
 - `dev-watchdog-preflight.mjs`
+
+`verify-docs-duplication.mjs` is the guard for agents that keep creating
+near-duplicate Markdown files. Set it to `fail` once a project has a settled
+documentation taxonomy.
 
 Pattern-only harness files are preserved under their original source paths:
 

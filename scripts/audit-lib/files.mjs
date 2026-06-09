@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative, sep } from 'node:path'
 
 export const ROOT = process.cwd()
@@ -51,6 +51,10 @@ export function normalize(path) {
 
 export function readText(rel) {
   return readFileSync(join(ROOT, rel), 'utf8')
+}
+
+export function exists(rel) {
+  return existsSync(join(ROOT, rel))
 }
 
 export function readJson(rel) {

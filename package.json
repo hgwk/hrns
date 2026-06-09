@@ -40,7 +40,15 @@
         "verify-no-orphan-fixtures.mjs",
         "verify-duplicate-helpers.mjs",
         "verify-thin-barrel-modules.mjs",
-        "verify-env-example-symbol-sync.mjs"
+        "verify-env-example-symbol-sync.mjs",
+        "verify-agent-instruction-drift.mjs",
+        "verify-docs-duplication.mjs",
+        "verify-task-workflow.mjs",
+        "verify-proof-record.mjs",
+        "verify-root-cause-record.mjs",
+        "verify-main-diff-scope.mjs",
+        "verify-stop-rule.mjs",
+        "verify-elegance-review.mjs"
       ]
     },
     "operational": {
@@ -49,6 +57,30 @@
         "audit:all",
         "line-audit"
       ]
+    },
+    "workflow": {
+      "mode": "warn"
+    },
+    "proof": {
+      "mode": "warn"
+    },
+    "rootCause": {
+      "mode": "warn"
+    },
+    "agentInstructions": {
+      "mode": "warn"
+    },
+    "docsDuplication": {
+      "mode": "warn"
+    },
+    "mainDiff": {
+      "mode": "warn"
+    },
+    "stopRule": {
+      "mode": "warn"
+    },
+    "elegance": {
+      "mode": "warn"
     }
   },
   "engines": {

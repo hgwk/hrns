@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process'
-import { existsSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { asStringArray, loadConfig } from '../scripts/audit-lib/config.mjs'
@@ -22,6 +22,14 @@ const configurableAudits = [
   'verify-env-example-symbol-sync.mjs',
   'verify-closed-world.mjs',
   'verify-operational-surface.mjs',
+  'verify-agent-instruction-drift.mjs',
+  'verify-docs-duplication.mjs',
+  'verify-task-workflow.mjs',
+  'verify-proof-record.mjs',
+  'verify-root-cause-record.mjs',
+  'verify-main-diff-scope.mjs',
+  'verify-stop-rule.mjs',
+  'verify-elegance-review.mjs',
 ]
 
 const specializedAudits = [
@@ -39,7 +47,8 @@ if (command === 'list') {
 }
 
 if (command === 'init') {
-  initConfig()
+  if (!args.includes('--tasks-only')) initConfig()
+  if (args.includes('--tasks')) initTasks()
   process.exit(0)
 }
 
@@ -107,9 +116,27 @@ function printList() {
 
 function initConfig() {
   const target = join(process.cwd(), 'hrns.config.json')
-  if (existsSync(target)) die('hrns.config.json already exists')
+  if (existsSync(target)) {
+    console.log('hrns.config.json already exists')
+    return
+  }
   writeFileSync(target, `${JSON.stringify(defaultProjectConfig(), null, 2)}\n`)
   console.log('created hrns.config.json')
+}
+
+function initTasks() {
+  const tasksDir = join(process.cwd(), 'tasks')
+  mkdirSync(tasksDir, { recursive: true })
+  const todoPath = join(tasksDir, 'todo.json')
+  const lessonsPath = join(tasksDir, 'lessons.json')
+  if (!existsSync(todoPath)) {
+    writeFileSync(todoPath, `${JSON.stringify(defaultTodo(), null, 2)}\n`)
+    console.log('created tasks/todo.json')
+  }
+  if (!existsSync(lessonsPath)) {
+    writeFileSync(lessonsPath, `${JSON.stringify(defaultLessons(), null, 2)}\n`)
+    console.log('created tasks/lessons.json')
+  }
 }
 
 function defaultProjectConfig() {
@@ -147,6 +174,78 @@ function defaultProjectConfig() {
       extraEntrypoints: [],
       alwaysAllowedPatterns: [],
     },
+    workflow: {
+      mode: 'warn',
+      todoPath: 'tasks/todo.json',
+      lessonsPath: 'tasks/lessons.json',
+    },
+    proof: {
+      mode: 'warn',
+      roots: ['tasks/todo.json', 'ledger/worklog.jsonl', 'README.md'],
+      terms: ['verification', '검증', 'evidence', 'commands'],
+    },
+    rootCause: {
+      mode: 'warn',
+      sources: ['tasks/todo.json', 'ledger/worklog.jsonl'],
+      requiredTerms: ['root cause', 'impact', 'why missed', 'verification'],
+    },
+    docsDuplication: {
+      mode: 'warn',
+      roots: ['docs', 'README.md'],
+      threshold: 0.72,
+      minTokens: 80,
+    },
+    mainDiff: {
+      mode: 'warn',
+      base: 'main',
+      maxFiles: 40,
+      maxChangedLines: 1200,
+    },
+    stopRule: {
+      mode: 'warn',
+      logPaths: ['tasks/todo.json', 'tasks/failures.log'],
+      repeatedFailureThreshold: 2,
+    },
+    elegance: {
+      mode: 'warn',
+      base: 'main',
+      maxNewFiles: 20,
+      maxLargeFiles: 4,
+    },
+  }
+}
+
+function defaultTodo() {
+  return {
+    version: 1,
+    items: [
+      {
+        id: 'plan',
+        task: 'Write the implementation plan before changing code.',
+        status: 'todo',
+      },
+      {
+        id: 'verify',
+        task: 'Record verification commands and observed results.',
+        status: 'todo',
+      },
+    ],
+    verification: {
+      commands: [],
+      evidence: [],
+      notes: '',
+    },
+    review: {
+      summary: '',
+      risks: [],
+    },
+  }
+}
+
+function defaultLessons() {
+  return {
+    version: 1,
+    lessons: [],
   }
 }
 
