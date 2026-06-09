@@ -3,6 +3,7 @@
 import { asStringArray, configSection } from './audit-lib/config.mjs'
 import { listFiles, readText } from './audit-lib/files.mjs'
 import { createAudit, finishByMode } from './audit-lib/report.mjs'
+import { jaccard, tokenSet } from './audit-lib/text-similarity.mjs'
 
 const audit = createAudit('verify-docs-duplication')
 const config = configSection('docsDuplication')
@@ -30,16 +31,3 @@ for (let i = 0; i < docs.length; i += 1) {
 }
 
 finishByMode(audit, findings, mode)
-
-function tokenSet(text) {
-  const stop = new Set(['the', 'and', 'for', 'with', 'that', 'this', 'from', '으로', '에서', '하는'])
-  return new Set(
-    (text.toLowerCase().match(/[a-z0-9가-힣_:-]{3,}/g) ?? []).filter((token) => !stop.has(token)),
-  )
-}
-
-function jaccard(left, right) {
-  let intersection = 0
-  for (const token of left) if (right.has(token)) intersection += 1
-  return intersection / Math.max(1, left.size + right.size - intersection)
-}

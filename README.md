@@ -12,7 +12,7 @@ From another project:
 
 ```sh
 pnpm add -D @hgwk/hrns
-pnpm hrns init --tasks
+pnpm hrns init --tasks --docs
 pnpm hrns list
 pnpm hrns audit
 ```
@@ -37,6 +37,12 @@ Create JSON task files with:
 
 ```sh
 pnpm hrns init --tasks
+```
+
+Create a JSON document proposal template with:
+
+```sh
+pnpm hrns init --docs
 ```
 
 The CLI also reads `package.json#hrns`. `hrns.config.json` wins over
@@ -75,6 +81,13 @@ Useful keys:
     "mode": "fail",
     "roots": ["docs", "README.md"],
     "threshold": 0.72
+  },
+  "docsProposal": {
+    "mode": "fail",
+    "roots": ["docs", "README.md"],
+    "proposalPath": ".hrns/doc-proposal.json",
+    "threshold": 0.52,
+    "titleThreshold": 0.45
   }
 }
 ```
@@ -116,6 +129,18 @@ they should be treated as universally portable:
 `verify-docs-duplication.mjs` is the guard for agents that keep creating
 near-duplicate Markdown files. Set it to `fail` once a project has a settled
 documentation taxonomy.
+
+For prevention before a new Markdown file exists, use the JSON proposal gate:
+
+```sh
+pnpm hrns docs:index
+pnpm hrns docs:check .hrns/doc-proposal.json
+```
+
+`docs:check` compares the proposal's `title`, `purpose`, `summary`, and
+`content` against existing Markdown. If it overlaps, the proposal must switch to
+`"decision": "update_existing"` and set `target` to the existing document path.
+That turns "make another similar doc" into "patch the source of truth".
 
 Pattern-only harness files are preserved under their original source paths:
 

@@ -64,6 +64,15 @@ const DEFAULT_CONFIG = {
     threshold: 0.72,
     minTokens: 80,
   },
+  docsProposal: {
+    mode: 'fail',
+    roots: ['docs', 'README.md'],
+    proposalPath: '.hrns/doc-proposal.json',
+    indexPath: '.hrns/docs-index.json',
+    threshold: 0.52,
+    titleThreshold: 0.45,
+    minProposalTokens: 12,
+  },
   mainDiff: {
     mode: 'warn',
     base: 'main',

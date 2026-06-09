@@ -24,6 +24,7 @@ const configurableAudits = [
   'verify-operational-surface.mjs',
   'verify-agent-instruction-drift.mjs',
   'verify-docs-duplication.mjs',
+  'verify-doc-proposal.mjs',
   'verify-task-workflow.mjs',
   'verify-proof-record.mjs',
   'verify-root-cause-record.mjs',
@@ -49,6 +50,7 @@ if (command === 'list') {
 if (command === 'init') {
   if (!args.includes('--tasks-only')) initConfig()
   if (args.includes('--tasks')) initTasks()
+  if (args.includes('--docs')) initDocsProposal()
   process.exit(0)
 }
 
@@ -71,6 +73,16 @@ if (command === 'line-audit') {
   process.exit(runOne('line-audit.mjs'))
 }
 
+if (command === 'docs:index') {
+  process.exit(runOne('docs-index.mjs'))
+}
+
+if (command === 'docs:check') {
+  const proposal = args[0]
+  const env = proposal ? { ...process.env, HRNS_DOC_PROPOSAL: proposal } : process.env
+  process.exit(runOne('verify-doc-proposal.mjs', env))
+}
+
 die(`unknown command: ${command}`)
 
 function runMany(scripts) {
@@ -87,13 +99,13 @@ function runMany(scripts) {
   return 0
 }
 
-function runOne(script) {
+function runOne(script, env = process.env) {
   const scriptPath = join(PACKAGE_ROOT, 'scripts', script)
   if (!existsSync(scriptPath)) die(`script not found: ${script}`)
   const result = spawnSync(process.execPath, [scriptPath], {
     cwd: process.cwd(),
     stdio: 'inherit',
-    env: process.env,
+    env,
   })
   return result.status ?? 1
 }
@@ -136,6 +148,16 @@ function initTasks() {
   if (!existsSync(lessonsPath)) {
     writeFileSync(lessonsPath, `${JSON.stringify(defaultLessons(), null, 2)}\n`)
     console.log('created tasks/lessons.json')
+  }
+}
+
+function initDocsProposal() {
+  const hrnsDir = join(process.cwd(), '.hrns')
+  mkdirSync(hrnsDir, { recursive: true })
+  const proposalPath = join(hrnsDir, 'doc-proposal.json')
+  if (!existsSync(proposalPath)) {
+    writeFileSync(proposalPath, `${JSON.stringify(defaultDocProposal(), null, 2)}\n`)
+    console.log('created .hrns/doc-proposal.json')
   }
 }
 
@@ -195,6 +217,15 @@ function defaultProjectConfig() {
       threshold: 0.72,
       minTokens: 80,
     },
+    docsProposal: {
+      mode: 'fail',
+      roots: ['docs', 'README.md'],
+      proposalPath: '.hrns/doc-proposal.json',
+      indexPath: '.hrns/docs-index.json',
+      threshold: 0.52,
+      titleThreshold: 0.45,
+      minProposalTokens: 12,
+    },
     mainDiff: {
       mode: 'warn',
       base: 'main',
@@ -246,6 +277,22 @@ function defaultLessons() {
   return {
     version: 1,
     lessons: [],
+  }
+}
+
+function defaultDocProposal() {
+  return {
+    version: 1,
+    proposals: [
+      {
+        path: 'docs/example.md',
+        title: 'Example Document',
+        purpose: 'Explain why this must be a new document instead of an update.',
+        summary: 'Short summary of the planned content.',
+        decision: 'new_document',
+        target: '',
+      },
+    ],
   }
 }
 

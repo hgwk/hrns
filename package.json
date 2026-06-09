@@ -43,6 +43,7 @@
         "verify-env-example-symbol-sync.mjs",
         "verify-agent-instruction-drift.mjs",
         "verify-docs-duplication.mjs",
+        "verify-doc-proposal.mjs",
         "verify-task-workflow.mjs",
         "verify-proof-record.mjs",
         "verify-root-cause-record.mjs",
@@ -71,6 +72,9 @@
       "mode": "warn"
     },
     "docsDuplication": {
+      "mode": "warn"
+    },
+    "docsProposal": {
       "mode": "warn"
     },
     "mainDiff": {
