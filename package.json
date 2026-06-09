@@ -23,6 +23,34 @@
     "list": "node bin/hrns.mjs list",
     "line-audit": "node scripts/line-audit.mjs"
   },
+  "hrns": {
+    "auditSets": {
+      "default": [
+        "verify-line-count.mjs",
+        "verify-docs-symbol-sync.mjs",
+        "verify-sensitive-config-placeholders.mjs",
+        "verify-no-orphan-fixtures.mjs",
+        "verify-duplicate-helpers.mjs",
+        "verify-thin-barrel-modules.mjs"
+      ],
+      "all": [
+        "verify-line-count.mjs",
+        "verify-docs-symbol-sync.mjs",
+        "verify-sensitive-config-placeholders.mjs",
+        "verify-no-orphan-fixtures.mjs",
+        "verify-duplicate-helpers.mjs",
+        "verify-thin-barrel-modules.mjs",
+        "verify-env-example-symbol-sync.mjs"
+      ]
+    },
+    "operational": {
+      "requiredRootScripts": [
+        "audit",
+        "audit:all",
+        "line-audit"
+      ]
+    }
+  },
   "engines": {
     "node": ">=20"
   }

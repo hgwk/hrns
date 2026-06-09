@@ -4,17 +4,17 @@ import { basename, dirname, join, normalize as pathNormalize } from 'node:path'
 import { existsSync } from 'node:fs'
 import { listFiles, listPackageJsons, readJson, readText, ROOT } from './audit-lib/files.mjs'
 import { createAudit } from './audit-lib/report.mjs'
+import { asStringArray, configSection } from './audit-lib/config.mjs'
 
 const audit = createAudit('verify-closed-world')
+const config = configSection('closedWorld')
 
-const sourceFiles = listFiles({ roots: ['packages', 'scripts'] }).filter((file) =>
+const sourceFiles = listFiles({ roots: asStringArray(config.roots, ['packages', 'scripts']) }).filter((file) =>
   /\.(ts|tsx|js|mjs)$/.test(file),
 )
 const entrypoints = new Set([
   'package.json',
-  'scripts/audit-all.mjs',
-  'scripts/ledger-verify.mjs',
-  'scripts/ticket-tree.mjs',
+  ...asStringArray(config.extraEntrypoints, []),
   ...sourceFiles.filter((file) => basename(file) === 'index.ts'),
   ...sourceFiles.filter((file) => file.endsWith('.test.ts') || file.endsWith('.test.tsx')),
   ...sourceFiles.filter((file) => /^scripts\/(?:audit-lib\/|verify-|ledger-|endpoint-)/.test(file)),
@@ -124,6 +124,9 @@ function resolveEntrypoint(rel) {
 }
 
 function isAlwaysAllowed(file) {
+  if (asStringArray(config.alwaysAllowedPatterns, []).some((pattern) => new RegExp(pattern).test(file))) {
+    return true
+  }
   return (
     file.endsWith('.d.ts') ||
     file.includes('/examples/') ||

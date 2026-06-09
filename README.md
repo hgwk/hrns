@@ -12,6 +12,7 @@ From another project:
 
 ```sh
 pnpm add -D @hgwk/hrns
+pnpm hrns init
 pnpm hrns list
 pnpm hrns audit
 ```
@@ -22,6 +23,44 @@ Local development in this repository:
 pnpm list
 pnpm audit
 pnpm audit:all
+```
+
+## Configuration
+
+Create `hrns.config.json` with:
+
+```sh
+pnpm hrns init
+```
+
+The CLI also reads `package.json#hrns`. `hrns.config.json` wins over
+`package.json#hrns`.
+
+Useful keys:
+
+```json
+{
+  "auditSets": {
+    "default": ["verify-line-count.mjs"],
+    "all": ["verify-line-count.mjs", "verify-operational-surface.mjs"]
+  },
+  "lineAudit": {
+    "maxLines": 300,
+    "roots": ["packages", "scripts"],
+    "extensions": [".ts", ".tsx", ".mjs", ".js"]
+  },
+  "env": {
+    "example": ".env.example",
+    "roots": ["packages", "scripts"],
+    "requiredPrefixes": ["APP_", "OPENAI_"],
+    "ignored": ["PATH", "NODE_ENV", "CI"]
+  },
+  "operational": {
+    "requiredRootScripts": ["ci", "audit"],
+    "docsRoots": ["docs", "README.md"],
+    "packageJsonRoots": ["package.json", "packages"]
+  }
+}
 ```
 
 ## Audit Sets
@@ -58,5 +97,5 @@ Keep runnable generic checks under `scripts/` and expose them through `bin/hrns.
 Checks should read the target repository from `process.cwd()`, while package
 assets should be resolved from `import.meta.url`.
 
-Project-specific defaults should move into a future `hrns.config.json` or
-`hrns.config.mjs` instead of being hard-coded in each verifier.
+Project-specific defaults belong in `hrns.config.json` or `package.json#hrns`
+instead of being hard-coded in each verifier.

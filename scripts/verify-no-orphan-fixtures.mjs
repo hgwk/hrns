@@ -3,11 +3,13 @@
 import { basename } from 'node:path'
 import { listFiles, readText } from './audit-lib/files.mjs'
 import { createAudit } from './audit-lib/report.mjs'
+import { asStringArray, configSection } from './audit-lib/config.mjs'
 
 const audit = createAudit('verify-no-orphan-fixtures')
+const config = configSection('fixtures')
 
-const fixtures = listFiles({ roots: ['packages'] }).filter((file) => file.includes('/fixtures/'))
-const tests = listFiles({ roots: ['packages'] }).filter((file) =>
+const fixtures = listFiles({ roots: asStringArray(config.roots, ['packages']) }).filter((file) => file.includes('/fixtures/'))
+const tests = listFiles({ roots: asStringArray(config.testRoots, ['packages']) }).filter((file) =>
   /\.(test|spec)\.(ts|tsx|js|mjs)$/.test(file),
 )
 const haystack = tests.map((file) => readText(file)).join('\n')

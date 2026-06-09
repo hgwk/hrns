@@ -2,12 +2,16 @@
 
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
+import { asNumber, asStringArray, configSection } from './audit-lib/config.mjs'
 
 const ROOT = process.cwd()
-const MAX_LINES = Number(process.env['LINE_AUDIT_MAX'] ?? 300)
+const lineConfig = configSection('lineAudit')
+const MAX_LINES = Number(process.env['LINE_AUDIT_MAX'] ?? asNumber(lineConfig.maxLines, 300))
 
-const SCAN_ROOTS = ['packages', 'scripts', 'infra']
-const EXTENSIONS = new Set(['.ts', '.tsx', '.mjs', '.js', '.rs', '.sql'])
+const SCAN_ROOTS = asStringArray(lineConfig.roots, ['packages', 'scripts', 'infra'])
+const EXTENSIONS = new Set(
+  asStringArray(lineConfig.extensions, ['.ts', '.tsx', '.mjs', '.js', '.rs', '.sql']),
+)
 const EXCLUDED_PARTS = new Set([
   '.git',
   'node_modules',

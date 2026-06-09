@@ -65,8 +65,8 @@ export function listFiles(options = {}) {
   return [...new Set(files)].sort()
 }
 
-export function listPackageJsons() {
-  return listFiles({ roots: ['package.json', 'packages'], extensions: new Set(['.json']) }).filter(
+export function listPackageJsons(roots = ['package.json', 'packages']) {
+  return listFiles({ roots, extensions: new Set(['.json']) }).filter(
     (file) => file === 'package.json' || file.endsWith('/package.json'),
   )
 }

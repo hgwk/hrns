@@ -4,10 +4,12 @@ import { existsSync } from 'node:fs'
 import { dirname, join, normalize as pathNormalize } from 'node:path'
 import { listFiles, readText, ROOT } from './audit-lib/files.mjs'
 import { createAudit } from './audit-lib/report.mjs'
+import { asStringArray, configSection } from './audit-lib/config.mjs'
 
 const audit = createAudit('verify-docs-symbol-sync')
+const config = configSection('docs')
 
-const DOCS = listFiles({ roots: ['docs', 'README.md', 'AGENTS.md', 'CLAUDE.md'] }).filter((file) =>
+const DOCS = listFiles({ roots: asStringArray(config.roots, ['docs', 'README.md', 'AGENTS.md', 'CLAUDE.md']) }).filter((file) =>
   file.endsWith('.md'),
 )
 const MARKDOWN_LINK = /\[[^\]]+\]\((?!https?:|mailto:|#)([^)#]+)(?:#[^)]+)?\)/g
