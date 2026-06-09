@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { asStringArray, loadConfig } from '../scripts/audit-lib/config.mjs'
@@ -51,6 +51,7 @@ if (command === 'init') {
   if (!args.includes('--tasks-only')) initConfig()
   if (args.includes('--tasks')) initTasks()
   if (args.includes('--docs')) initDocsProposal()
+  if (args.includes('--instructions')) initInstructions()
   process.exit(0)
 }
 
@@ -159,6 +160,41 @@ function initDocsProposal() {
     writeFileSync(proposalPath, `${JSON.stringify(defaultDocProposal(), null, 2)}\n`)
     console.log('created .hrns/doc-proposal.json')
   }
+}
+
+function initInstructions() {
+  const hrnsDir = join(process.cwd(), '.hrns')
+  mkdirSync(hrnsDir, { recursive: true })
+  const instructionsPath = join(hrnsDir, 'instructions.md')
+  if (!existsSync(instructionsPath)) {
+    writeFileSync(instructionsPath, defaultInstructions())
+    console.log('created .hrns/instructions.md')
+  }
+  for (const file of ['AGENTS.md', 'CLAUDE.md']) injectInstructionInclude(file)
+}
+
+function injectInstructionInclude(file) {
+  const target = join(process.cwd(), file)
+  const block = [
+    '<!-- HRNS_START -->',
+    '',
+    'See [`.hrns/instructions.md`](.hrns/instructions.md) for repository audit, workflow evidence, and document proposal gates.',
+    '',
+    '<!-- HRNS_END -->',
+    '',
+  ].join('\n')
+  if (!existsSync(target)) {
+    writeFileSync(target, block)
+    console.log(`created ${file}`)
+    return
+  }
+  const current = readFileSync(target, 'utf8')
+  if (current.includes('<!-- HRNS_START -->')) {
+    console.log(`${file} already contains HRNS include`)
+    return
+  }
+  writeFileSync(target, `${block}${current}`)
+  console.log(`updated ${file}`)
 }
 
 function defaultProjectConfig() {
@@ -294,6 +330,36 @@ function defaultDocProposal() {
       },
     ],
   }
+}
+
+function defaultInstructions() {
+  return `# hrns Instructions
+
+## Audit Gates
+
+- Run \`pnpm hrns audit\` before marking work complete.
+- For broader review, run \`pnpm hrns audit --all\` and resolve fail-mode findings.
+- Keep project-specific gate behavior in \`hrns.config.json\` or \`package.json#hrns\`.
+
+## JSON Workflow State
+
+- Use \`tasks/todo.json\` for active plan items, status, verification commands, evidence, and review notes.
+- Use \`tasks/lessons.json\` for repeated feedback patterns and corrections.
+- Do not create Markdown todo/lesson scratchpads as the workflow source of truth.
+
+## Document Creation Gate
+
+- Before creating a new Markdown document, write \`.hrns/doc-proposal.json\`.
+- Run \`pnpm hrns docs:index\` and \`pnpm hrns docs:check .hrns/doc-proposal.json\`.
+- If the proposal overlaps an existing document, do not create the new file. Update the reported existing document instead.
+- To intentionally update an existing document, set \`"decision": "update_existing"\` and \`"target"\` to the existing document path.
+
+## Duplicate Instruction Control
+
+- Keep long operating instructions in one included file.
+- Do not paste the same guidance into both \`AGENTS.md\`, \`CLAUDE.md\`, and tool-specific instruction files.
+- If an include already points to this file, update this file rather than adding another prose copy.
+`
 }
 
 function die(message) {

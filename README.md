@@ -12,7 +12,7 @@ From another project:
 
 ```sh
 pnpm add -D @hgwk/hrns
-pnpm hrns init --tasks --docs
+pnpm hrns init --tasks --docs --instructions
 pnpm hrns list
 pnpm hrns audit
 ```
@@ -43,6 +43,13 @@ Create a JSON document proposal template with:
 
 ```sh
 pnpm hrns init --docs
+```
+
+Inject a short `AGENTS.md` / `CLAUDE.md` include and create
+`.hrns/instructions.md` with:
+
+```sh
+pnpm hrns init --instructions
 ```
 
 The CLI also reads `package.json#hrns`. `hrns.config.json` wins over
@@ -95,6 +102,10 @@ Useful keys:
 `mode` may be `fail`, `warn`, or `off`. Workflow state is JSON by default;
 `tasks/todo.json` and `tasks/lessons.json` are intended to be machine-readable
 agent coordination files, not prose scratchpads.
+
+Instruction injection is intentionally short. `AGENTS.md` and `CLAUDE.md` get
+only an `HRNS_START` include block; the actual rules live in
+`.hrns/instructions.md`, similar to cduo/ldgr-style local instruction includes.
 
 ## Audit Sets
 

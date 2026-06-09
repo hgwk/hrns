@@ -3,4 +3,4 @@ dist/
 coverage/
 .DS_Store
 *.tgz
-.hrns/
+.hrns/docs-index.json
