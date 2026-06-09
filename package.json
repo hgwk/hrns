@@ -1,0 +1,29 @@
+{
+  "name": "@hgwk/hrns",
+  "version": "0.1.0",
+  "description": "Portable repository audit and test harness scripts.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "hrns": "./bin/hrns.mjs",
+    "hrns-audit": "./bin/hrns.mjs",
+    "hrns-line-audit": "./scripts/line-audit.mjs"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "packages/e2e/helpers/servers.ts",
+    "packages/desktop/test/desktop-wire-smoke.ts",
+    "packages/desktop/test/desktop-wire-smoke-matrix.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "audit": "node bin/hrns.mjs audit",
+    "audit:all": "node bin/hrns.mjs audit --all",
+    "list": "node bin/hrns.mjs list",
+    "line-audit": "node scripts/line-audit.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
