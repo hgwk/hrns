@@ -44,9 +44,6 @@
         "verify-agent-instruction-drift.mjs",
         "verify-docs-duplication.mjs",
         "verify-doc-proposal.mjs",
-        "verify-task-workflow.mjs",
-        "verify-proof-record.mjs",
-        "verify-root-cause-record.mjs",
         "verify-main-diff-scope.mjs",
         "verify-stop-rule.mjs",
         "verify-elegance-review.mjs"
@@ -58,15 +55,6 @@
         "audit:all",
         "line-audit"
       ]
-    },
-    "workflow": {
-      "mode": "warn"
-    },
-    "proof": {
-      "mode": "warn"
-    },
-    "rootCause": {
-      "mode": "warn"
     },
     "agentInstructions": {
       "mode": "warn"

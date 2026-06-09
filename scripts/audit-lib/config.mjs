@@ -38,21 +38,6 @@ const DEFAULT_CONFIG = {
     extraEntrypoints: [],
     alwaysAllowedPatterns: [],
   },
-  workflow: {
-    mode: 'warn',
-    todoPath: 'tasks/todo.json',
-    lessonsPath: 'tasks/lessons.json',
-  },
-  proof: {
-    mode: 'warn',
-    roots: ['tasks/todo.json', 'ledger/worklog.jsonl', 'README.md'],
-    terms: ['verification', '검증', 'evidence', 'commands'],
-  },
-  rootCause: {
-    mode: 'warn',
-    sources: ['tasks/todo.json', 'ledger/worklog.jsonl'],
-    requiredTerms: ['root cause', 'impact', 'why missed', 'verification'],
-  },
   agentInstructions: {
     mode: 'warn',
     files: ['AGENTS.md', 'CLAUDE.md', '.cduo/orchestration.md', '.ldgr/instructions.md'],
@@ -81,7 +66,7 @@ const DEFAULT_CONFIG = {
   },
   stopRule: {
     mode: 'warn',
-    logPaths: ['tasks/todo.json', 'tasks/failures.log'],
+    logPaths: ['.hrns/failures.log'],
     repeatedFailureThreshold: 2,
   },
   elegance: {

@@ -25,9 +25,6 @@ const configurableAudits = [
   'verify-agent-instruction-drift.mjs',
   'verify-docs-duplication.mjs',
   'verify-doc-proposal.mjs',
-  'verify-task-workflow.mjs',
-  'verify-proof-record.mjs',
-  'verify-root-cause-record.mjs',
   'verify-main-diff-scope.mjs',
   'verify-stop-rule.mjs',
   'verify-elegance-review.mjs',
@@ -48,8 +45,7 @@ if (command === 'list') {
 }
 
 if (command === 'init') {
-  if (!args.includes('--tasks-only')) initConfig()
-  if (args.includes('--tasks')) initTasks()
+  initConfig()
   if (args.includes('--docs')) initDocsProposal()
   if (args.includes('--instructions')) initInstructions()
   process.exit(0)
@@ -137,21 +133,6 @@ function initConfig() {
   console.log('created hrns.config.json')
 }
 
-function initTasks() {
-  const tasksDir = join(process.cwd(), 'tasks')
-  mkdirSync(tasksDir, { recursive: true })
-  const todoPath = join(tasksDir, 'todo.json')
-  const lessonsPath = join(tasksDir, 'lessons.json')
-  if (!existsSync(todoPath)) {
-    writeFileSync(todoPath, `${JSON.stringify(defaultTodo(), null, 2)}\n`)
-    console.log('created tasks/todo.json')
-  }
-  if (!existsSync(lessonsPath)) {
-    writeFileSync(lessonsPath, `${JSON.stringify(defaultLessons(), null, 2)}\n`)
-    console.log('created tasks/lessons.json')
-  }
-}
-
 function initDocsProposal() {
   const hrnsDir = join(process.cwd(), '.hrns')
   mkdirSync(hrnsDir, { recursive: true })
@@ -163,38 +144,60 @@ function initDocsProposal() {
 }
 
 function initInstructions() {
-  const hrnsDir = join(process.cwd(), '.hrns')
-  mkdirSync(hrnsDir, { recursive: true })
-  const instructionsPath = join(hrnsDir, 'instructions.md')
-  if (!existsSync(instructionsPath)) {
-    writeFileSync(instructionsPath, defaultInstructions())
-    console.log('created .hrns/instructions.md')
-  }
+  const instructionsPath = instructionBodyPath()
+  mkdirSync(dirname(instructionsPath), { recursive: true })
+  writeFileSync(instructionsPath, defaultInstructions())
+  console.log(`updated ${instructionsPath}`)
   for (const file of ['AGENTS.md', 'CLAUDE.md']) injectInstructionInclude(file)
 }
 
 function injectInstructionInclude(file) {
   const target = join(process.cwd(), file)
-  const block = [
-    '<!-- HRNS_START -->',
-    '',
-    'See [`.hrns/instructions.md`](.hrns/instructions.md) for repository audit, workflow evidence, and document proposal gates.',
-    '',
-    '<!-- HRNS_END -->',
-    '',
-  ].join('\n')
+  const pointer = `@${instructionBodyPath()}`
   if (!existsSync(target)) {
-    writeFileSync(target, block)
+    writeFileSync(target, `${pointer}\n`)
     console.log(`created ${file}`)
     return
   }
   const current = readFileSync(target, 'utf8')
-  if (current.includes('<!-- HRNS_START -->')) {
-    console.log(`${file} already contains HRNS include`)
+  const updated = upsertInstructionPointer(current, pointer)
+  if (updated === current) {
+    console.log(`${file} already references hrns instructions`)
     return
   }
-  writeFileSync(target, `${block}${current}`)
+  writeFileSync(target, updated)
   console.log(`updated ${file}`)
+}
+
+function upsertInstructionPointer(current, pointer) {
+  const cleaned = stripLeadingSeparator(removeKnownInstructionPointers(current)).trim()
+  if (current.trim() === pointer) return current
+  if (cleaned === '') return `${pointer}\n`
+  return `${pointer}\n\n---\n\n${cleaned}\n`
+}
+
+function removeKnownInstructionPointers(content) {
+  let out = content
+  for (const pointer of [`@${instructionBodyPath()}`, '@.hrns/instructions.md']) {
+    out = removePointerPrelude(out, pointer)
+    out = stripLeadingSeparator(out)
+  }
+  return out
+}
+
+function removePointerPrelude(content, pointer) {
+  const lines = content.split('\n')
+  if (lines[0]?.trim() !== pointer) return content
+  return lines.slice(1).join('\n')
+}
+
+function stripLeadingSeparator(content) {
+  return content.replace(/^\s*---\s*\n+/, '')
+}
+
+function instructionBodyPath() {
+  const home = process.env.HRNS_HOME ?? join(process.env.HOME ?? process.cwd(), '.hrns')
+  return join(home, 'instructions.md')
 }
 
 function defaultProjectConfig() {
@@ -232,21 +235,6 @@ function defaultProjectConfig() {
       extraEntrypoints: [],
       alwaysAllowedPatterns: [],
     },
-    workflow: {
-      mode: 'warn',
-      todoPath: 'tasks/todo.json',
-      lessonsPath: 'tasks/lessons.json',
-    },
-    proof: {
-      mode: 'warn',
-      roots: ['tasks/todo.json', 'ledger/worklog.jsonl', 'README.md'],
-      terms: ['verification', '검증', 'evidence', 'commands'],
-    },
-    rootCause: {
-      mode: 'warn',
-      sources: ['tasks/todo.json', 'ledger/worklog.jsonl'],
-      requiredTerms: ['root cause', 'impact', 'why missed', 'verification'],
-    },
     docsDuplication: {
       mode: 'warn',
       roots: ['docs', 'README.md'],
@@ -270,7 +258,7 @@ function defaultProjectConfig() {
     },
     stopRule: {
       mode: 'warn',
-      logPaths: ['tasks/todo.json', 'tasks/failures.log'],
+      logPaths: ['.hrns/failures.log'],
       repeatedFailureThreshold: 2,
     },
     elegance: {
@@ -279,40 +267,6 @@ function defaultProjectConfig() {
       maxNewFiles: 20,
       maxLargeFiles: 4,
     },
-  }
-}
-
-function defaultTodo() {
-  return {
-    version: 1,
-    items: [
-      {
-        id: 'plan',
-        task: 'Write the implementation plan before changing code.',
-        status: 'todo',
-      },
-      {
-        id: 'verify',
-        task: 'Record verification commands and observed results.',
-        status: 'todo',
-      },
-    ],
-    verification: {
-      commands: [],
-      evidence: [],
-      notes: '',
-    },
-    review: {
-      summary: '',
-      risks: [],
-    },
-  }
-}
-
-function defaultLessons() {
-  return {
-    version: 1,
-    lessons: [],
   }
 }
 
@@ -341,11 +295,11 @@ function defaultInstructions() {
 - For broader review, run \`pnpm hrns audit --all\` and resolve fail-mode findings.
 - Keep project-specific gate behavior in \`hrns.config.json\` or \`package.json#hrns\`.
 
-## JSON Workflow State
+## Task And Worklog Ownership
 
-- Use \`tasks/todo.json\` for active plan items, status, verification commands, evidence, and review notes.
-- Use \`tasks/lessons.json\` for repeated feedback patterns and corrections.
-- Do not create Markdown todo/lesson scratchpads as the workflow source of truth.
+- hrns does not own tasks, lessons, tickets, or worklogs.
+- Use ldgr for task state, lessons, append-only tickets, worklogs, and handoff records.
+- Use hrns only for repository audit gates and document creation checks.
 
 ## Document Creation Gate
 

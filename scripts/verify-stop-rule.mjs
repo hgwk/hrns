@@ -7,7 +7,7 @@ import { createAudit, finishByMode } from './audit-lib/report.mjs'
 const audit = createAudit('verify-stop-rule')
 const config = configSection('stopRule')
 const mode = config.mode ?? 'warn'
-const logPaths = asStringArray(config.logPaths, ['tasks/todo.json', 'tasks/failures.log'])
+const logPaths = asStringArray(config.logPaths, ['.hrns/failures.log'])
 const repeatedFailureThreshold = Number(config.repeatedFailureThreshold ?? 2)
 const findings = []
 

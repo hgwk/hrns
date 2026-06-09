@@ -12,7 +12,7 @@ From another project:
 
 ```sh
 pnpm add -D @hgwk/hrns
-pnpm hrns init --tasks --docs --instructions
+pnpm hrns init --docs --instructions
 pnpm hrns list
 pnpm hrns audit
 ```
@@ -33,20 +33,14 @@ Create `hrns.config.json` with:
 pnpm hrns init
 ```
 
-Create JSON task files with:
-
-```sh
-pnpm hrns init --tasks
-```
-
 Create a JSON document proposal template with:
 
 ```sh
 pnpm hrns init --docs
 ```
 
-Inject a short `AGENTS.md` / `CLAUDE.md` include and create
-`.hrns/instructions.md` with:
+Inject a short `AGENTS.md` / `CLAUDE.md` prelude and create the home-local
+instruction body with:
 
 ```sh
 pnpm hrns init --instructions
@@ -79,11 +73,6 @@ Useful keys:
     "docsRoots": ["docs", "README.md"],
     "packageJsonRoots": ["package.json", "packages"]
   },
-  "workflow": {
-    "mode": "warn",
-    "todoPath": "tasks/todo.json",
-    "lessonsPath": "tasks/lessons.json"
-  },
   "docsDuplication": {
     "mode": "fail",
     "roots": ["docs", "README.md"],
@@ -99,13 +88,13 @@ Useful keys:
 }
 ```
 
-`mode` may be `fail`, `warn`, or `off`. Workflow state is JSON by default;
-`tasks/todo.json` and `tasks/lessons.json` are intended to be machine-readable
-agent coordination files, not prose scratchpads.
+`mode` may be `fail`, `warn`, or `off`. hrns does not own task state, lessons,
+tickets, or worklogs; use ldgr for that layer.
 
-Instruction injection is intentionally short. `AGENTS.md` and `CLAUDE.md` get
-only an `HRNS_START` include block; the actual rules live in
-`.hrns/instructions.md`, similar to cduo/ldgr-style local instruction includes.
+Instruction injection matches cduo/ldgr prelude behavior. `AGENTS.md` and
+`CLAUDE.md` get only a top-of-file absolute `@.../.hrns/instructions.md`
+pointer; the actual rules live in `~/.hrns/instructions.md`. Set `HRNS_HOME`
+to override the home-local directory in tests or isolated environments.
 
 ## Audit Sets
 
@@ -127,9 +116,6 @@ they should be treated as universally portable:
 - `verify-operational-surface.mjs`
 - `verify-agent-instruction-drift.mjs`
 - `verify-docs-duplication.mjs`
-- `verify-task-workflow.mjs`
-- `verify-proof-record.mjs`
-- `verify-root-cause-record.mjs`
 - `verify-main-diff-scope.mjs`
 - `verify-stop-rule.mjs`
 - `verify-elegance-review.mjs`
