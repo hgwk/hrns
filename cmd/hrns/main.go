@@ -9,6 +9,12 @@ import (
 )
 
 func main() {
+	if target := os.Getenv("HRNS_TARGET_ROOT"); target != "" {
+		if err := os.Chdir(target); err != nil {
+			fmt.Fprintln(os.Stderr, "hrns:", err)
+			os.Exit(1)
+		}
+	}
 	args := os.Args[1:]
 	switch filepath.Base(os.Args[0]) {
 	case "hrns-audit":

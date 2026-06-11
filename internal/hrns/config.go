@@ -2,6 +2,7 @@ package hrns
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 )
@@ -181,18 +182,28 @@ func DefaultConfig() Config {
 
 func LoadConfig(root string) (Config, error) {
 	cfg := DefaultConfig()
-	_ = mergeConfigFile(&cfg, filepath.Join(root, "package.json"), "hrns")
+	if err := mergeConfigFile(&cfg, filepath.Join(root, "package.json"), "hrns"); err != nil {
+		return cfg, err
+	}
 	path := os.Getenv("HRNS_CONFIG")
 	if path == "" {
 		path = filepath.Join(root, "hrns.config.json")
 	}
-	_ = mergeConfigFile(&cfg, path, "")
+	if err := mergeConfigFile(&cfg, path, ""); err != nil {
+		return cfg, err
+	}
 	return cfg, nil
 }
 
 func mergeConfigFile(cfg *Config, path, nested string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	if len(data) == 0 {
 		return nil
 	}
 	var raw map[string]any

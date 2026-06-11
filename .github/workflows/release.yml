@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache: true
+          cache: false
       - name: gofmt
         run: |
           set -euo pipefail
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache: true
+          cache: false
       - name: build
         env:
           GOOS: ${{ matrix.goos }}
@@ -63,7 +63,7 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           out="dist/hrns_${version}_${GOOS}_${GOARCH}"
           mkdir -p "$out"
-          go build -trimpath -ldflags "-s -w" -o "$out/hrns" ./cmd/hrns
+          go build -trimpath -ldflags "-s -w -X github.com/hgwk/hrns/internal/hrns.Version=${version}" -o "$out/hrns" ./cmd/hrns
           cp README.md LICENSE "$out/"
           tar -C dist -czf "${out}.tar.gz" "$(basename "$out")"
       - name: upload artifact

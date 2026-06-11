@@ -49,6 +49,7 @@ func RunMainDiffScope(cfg Config) error {
 	if mergeBase == "" {
 		return finishByMode(a, []Finding{{Message: "cannot find merge base with " + base}}, cfg.MainDiff.Mode)
 	}
+	riskyPatterns, findings := compilePatterns("riskyPatterns", cfg.MainDiff.RiskyPatterns)
 	names := lines(git("diff", "--name-only", mergeBase, "HEAD"))
 	stat := lines(git("diff", "--numstat", mergeBase, "HEAD"))
 	changed := 0
@@ -58,7 +59,6 @@ func RunMainDiffScope(cfg Config) error {
 			changed += numeric(parts[0]) + numeric(parts[1])
 		}
 	}
-	var findings []Finding
 	if len(names) > cfg.MainDiff.MaxFiles {
 		findings = append(findings, Finding{"diff touches too many files", fmt.Sprintf("%d > %d", len(names), cfg.MainDiff.MaxFiles)})
 	}
@@ -66,8 +66,8 @@ func RunMainDiffScope(cfg Config) error {
 		findings = append(findings, Finding{"diff changes too many lines", fmt.Sprintf("%d > %d", changed, cfg.MainDiff.MaxChangedLines)})
 	}
 	for _, file := range names {
-		for _, pattern := range cfg.MainDiff.RiskyPatterns {
-			if regexp.MustCompile(pattern).MatchString(file) {
+		for _, pattern := range riskyPatterns {
+			if pattern.MatchString(file) {
 				findings = append(findings, Finding{"diff touches risky/generated path", file})
 			}
 		}

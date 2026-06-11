@@ -1,8 +1,20 @@
 #!/bin/sh
 set -eu
-DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-case "$(basename -- "$0")" in
-  hrns-line-audit) exec go run "$DIR/../cmd/hrns" line-audit "$@" ;;
-  hrns-audit) exec go run "$DIR/../cmd/hrns" audit "$@" ;;
+CMD=$(basename -- "$0")
+SCRIPT=$0
+while [ -L "$SCRIPT" ]; do
+  DIR=$(CDPATH= cd -- "$(dirname -- "$SCRIPT")" && pwd)
+  TARGET=$(readlink "$SCRIPT")
+  case "$TARGET" in
+    /*) SCRIPT=$TARGET ;;
+    *) SCRIPT=$DIR/$TARGET ;;
+  esac
+done
+DIR=$(CDPATH= cd -- "$(dirname -- "$SCRIPT")" && pwd)
+TARGET_ROOT=$(pwd)
+cd "$DIR/.."
+case "$CMD" in
+  hrns-line-audit) exec env HRNS_TARGET_ROOT="$TARGET_ROOT" go run ./cmd/hrns line-audit "$@" ;;
+  hrns-audit) exec env HRNS_TARGET_ROOT="$TARGET_ROOT" go run ./cmd/hrns audit "$@" ;;
 esac
-exec go run "$DIR/../cmd/hrns" "$@"
+exec env HRNS_TARGET_ROOT="$TARGET_ROOT" go run ./cmd/hrns "$@"

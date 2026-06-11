@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -33,6 +34,26 @@ func TestConfigForProjectDetectsTypescriptModuleShape(t *testing.T) {
 	assertEqual(t, "magic roots", cfg.MagicNumbers.Roots, []string{"src", "tests"})
 	assertEqual(t, "magic allow paths", cfg.MagicNumbers.AllowPaths, []string{"^tests/"})
 	assertEqual(t, "placeholder roots", cfg.PlaceholderRoutes.Roots, []string{"src"})
+}
+
+func TestLoadConfigReturnsMalformedConfigError(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "hrns.config.json", `{"lineAudit":`)
+
+	_, err := LoadConfig(root)
+	if err == nil || !strings.Contains(err.Error(), "unexpected end") {
+		t.Fatalf("expected malformed config error, got %v", err)
+	}
+}
+
+func TestLoadConfigReturnsMalformedPackageConfigError(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "package.json", `{"hrns":`)
+
+	_, err := LoadConfig(root)
+	if err == nil || !strings.Contains(err.Error(), "unexpected end") {
+		t.Fatalf("expected malformed package config error, got %v", err)
+	}
 }
 
 func mkdirs(t *testing.T, root string, dirs ...string) {

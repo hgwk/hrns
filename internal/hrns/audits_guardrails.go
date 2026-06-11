@@ -26,21 +26,28 @@ func RunJSONDuplicateKeys(cfg Config) error {
 
 func RunForbiddenReferences(cfg Config) error {
 	a := NewAudit("verify-forbidden-references")
-	allow := compilePatterns(cfg.ForbiddenRefs.AllowPaths)
+	allow, findings := compilePatterns("allowPaths", cfg.ForbiddenRefs.AllowPaths)
 	rules := make([]struct {
 		re      *regexp.Regexp
 		message string
 	}, 0, len(cfg.ForbiddenRefs.Rules))
-	for _, rule := range cfg.ForbiddenRefs.Rules {
+	for i, rule := range cfg.ForbiddenRefs.Rules {
 		if rule.Pattern == "" {
+			continue
+		}
+		re, err := regexp.Compile(rule.Pattern)
+		if err != nil {
+			findings = append(findings, Finding{
+				Message: fmt.Sprintf("rules[%d]: invalid regex", i),
+				Detail:  err.Error(),
+			})
 			continue
 		}
 		rules = append(rules, struct {
 			re      *regexp.Regexp
 			message string
-		}{regexp.MustCompile(rule.Pattern), rule.Message})
+		}{re, rule.Message})
 	}
-	var findings []Finding
 	if len(rules) == 0 {
 		return finishByMode(a, findings, cfg.ForbiddenRefs.Mode)
 	}
@@ -64,10 +71,9 @@ func RunForbiddenReferences(cfg Config) error {
 
 func RunMagicNumbers(cfg Config) error {
 	a := NewAudit("verify-magic-numbers")
-	allowPaths := compilePatterns(cfg.MagicNumbers.AllowPaths)
+	allowPaths, findings := compilePatterns("allowPaths", cfg.MagicNumbers.AllowPaths)
 	allowed := stringSet(cfg.MagicNumbers.AllowedValues)
 	numberRe := regexp.MustCompile(`(?:^|[^\w.])(-?\d+(?:\.\d+)?)(?:$|[^\w.])`)
-	var findings []Finding
 	for _, file := range ListFiles(cfg.MagicNumbers.Roots, nil) {
 		if matchesAny(allowPaths, file) || !isCodeFile(file) || strings.HasSuffix(file, ".tsx") {
 			continue
@@ -116,7 +122,15 @@ func RunStructureRatchet(cfg Config) error {
 			if metric.Pattern == "" || metric.Max < 0 {
 				continue
 			}
-			count := len(regexp.MustCompile(metric.Pattern).FindAllString(text, -1))
+			re, err := regexp.Compile(metric.Pattern)
+			if err != nil {
+				findings = append(findings, Finding{
+					Message: item.Path + ": invalid ratchet regex",
+					Detail:  err.Error(),
+				})
+				continue
+			}
+			count := len(re.FindAllString(text, -1))
 			if count > metric.Max {
 				name := metric.Name
 				if name == "" {
@@ -148,14 +162,23 @@ func RunNoPlaceholderRoutes(cfg Config) error {
 	return finishByMode(a, findings, cfg.PlaceholderRoutes.Mode)
 }
 
-func compilePatterns(patterns []string) []*regexp.Regexp {
+func compilePatterns(field string, patterns []string) ([]*regexp.Regexp, []Finding) {
 	out := make([]*regexp.Regexp, 0, len(patterns))
-	for _, pattern := range patterns {
+	var findings []Finding
+	for i, pattern := range patterns {
 		if pattern != "" {
-			out = append(out, regexp.MustCompile(pattern))
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				findings = append(findings, Finding{
+					Message: fmt.Sprintf("%s[%d]: invalid regex", field, i),
+					Detail:  err.Error(),
+				})
+				continue
+			}
+			out = append(out, re)
 		}
 	}
-	return out
+	return out, findings
 }
 
 func matchesAny(patterns []*regexp.Regexp, value string) bool {
