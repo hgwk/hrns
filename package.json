@@ -1,59 +1,80 @@
 {
   "name": "@hgwk/hrns",
   "version": "0.1.0",
-  "description": "Portable repository audit and test harness scripts.",
-  "type": "module",
+  "description": "Portable repository audit and test harness CLI.",
   "license": "MIT",
   "bin": {
-    "hrns": "./bin/hrns.mjs",
-    "hrns-audit": "./bin/hrns.mjs",
-    "hrns-line-audit": "./scripts/line-audit.mjs"
+    "hrns": "./bin/hrns",
+    "hrns-audit": "./bin/hrns",
+    "hrns-line-audit": "./bin/hrns"
   },
   "files": [
     "bin/",
-    "scripts/",
+    "cmd/",
+    "internal/",
+    "go.mod",
     "packages/e2e/helpers/servers.ts",
     "packages/desktop/test/desktop-wire-smoke.ts",
     "packages/desktop/test/desktop-wire-smoke-matrix.ts",
     "README.md"
   ],
   "scripts": {
-    "audit": "node bin/hrns.mjs audit",
-    "audit:all": "node bin/hrns.mjs audit --all",
-    "list": "node bin/hrns.mjs list",
-    "line-audit": "node scripts/line-audit.mjs"
+    "audit": "go run ./cmd/hrns audit",
+    "audit:all": "go run ./cmd/hrns audit --all",
+    "list": "go run ./cmd/hrns list",
+    "line-audit": "go run ./cmd/hrns line-audit"
   },
   "hrns": {
-    "auditSets": {
-      "default": [
-        "verify-line-count.mjs",
-        "verify-docs-symbol-sync.mjs",
-        "verify-sensitive-config-placeholders.mjs",
-        "verify-no-orphan-fixtures.mjs",
-        "verify-duplicate-helpers.mjs",
-        "verify-thin-barrel-modules.mjs"
+    "lineAudit": {
+      "maxLines": 300,
+      "roots": [
+        "cmd",
+        "internal",
+        "scripts",
+        "packages",
+        "infra"
       ],
-      "all": [
-        "verify-line-count.mjs",
-        "verify-docs-symbol-sync.mjs",
-        "verify-sensitive-config-placeholders.mjs",
-        "verify-no-orphan-fixtures.mjs",
-        "verify-duplicate-helpers.mjs",
-        "verify-thin-barrel-modules.mjs",
-        "verify-env-example-symbol-sync.mjs",
-        "verify-agent-instruction-drift.mjs",
-        "verify-docs-duplication.mjs",
-        "verify-doc-proposal.mjs",
-        "verify-main-diff-scope.mjs",
-        "verify-stop-rule.mjs",
-        "verify-elegance-review.mjs"
+      "extensions": [
+        ".go",
+        ".ts",
+        ".tsx",
+        ".mjs",
+        ".js",
+        ".rs",
+        ".sql"
       ]
     },
-    "operational": {
-      "requiredRootScripts": [
-        "audit",
-        "audit:all",
-        "line-audit"
+    "auditSets": {
+      "default": [
+        "verify-line-count",
+        "verify-docs-symbol-sync",
+        "verify-sensitive-config-placeholders",
+        "verify-no-orphan-fixtures",
+        "verify-duplicate-helpers",
+        "verify-thin-barrel-modules"
+      ],
+      "all": [
+        "verify-line-count",
+        "verify-docs-symbol-sync",
+        "verify-sensitive-config-placeholders",
+        "verify-no-orphan-fixtures",
+        "verify-duplicate-helpers",
+        "verify-thin-barrel-modules",
+        "verify-env-example-symbol-sync",
+        "verify-agent-instruction-drift",
+        "verify-docs-duplication",
+        "verify-doc-proposal",
+        "verify-json-duplicate-keys",
+        "verify-forbidden-references",
+        "verify-magic-numbers",
+        "verify-structure-ratchet",
+        "verify-no-placeholder-routes",
+        "verify-scope-drift",
+        "verify-speculative-abstractions",
+        "verify-regression-evidence",
+        "verify-main-diff-scope",
+        "verify-stop-rule",
+        "verify-elegance-review"
       ]
     },
     "agentInstructions": {
@@ -65,6 +86,15 @@
     "docsProposal": {
       "mode": "warn"
     },
+    "scopeDrift": {
+      "mode": "warn"
+    },
+    "speculativeAbstractions": {
+      "mode": "warn"
+    },
+    "regressionEvidence": {
+      "mode": "warn"
+    },
     "mainDiff": {
       "mode": "warn"
     },
@@ -74,8 +104,5 @@
     "elegance": {
       "mode": "warn"
     }
-  },
-  "engines": {
-    "node": ">=20"
   }
 }
