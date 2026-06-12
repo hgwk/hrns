@@ -15,8 +15,10 @@ go install github.com/hgwk/hrns/cmd/hrns@latest
 hrns version
 hrns init --docs --instructions
 hrns list
+hrns list --json
 hrns explain verify-line-count
 hrns audit
+hrns audit --with-ldgr
 ```
 
 For local development and manual installs, use this shared convention:
@@ -33,9 +35,11 @@ Local development in this repository:
 ```sh
 go run ./cmd/hrns version
 go run ./cmd/hrns list
+go run ./cmd/hrns list --json
 go run ./cmd/hrns explain verify-line-count
 go run ./cmd/hrns audit
 go run ./cmd/hrns audit --all
+go run ./cmd/hrns audit --with-ldgr
 ```
 
 ## Companion Tool Roles
@@ -50,11 +54,14 @@ Create `hrns.config.json` with:
 
 ```sh
 hrns init
+hrns init --profile go
 ```
 
 `hrns init` detects the current repository shape and writes roots for the
 directories and files that actually exist, such as `src`, `tests`,
 `migrations`, `docs`, `package.json`, and TypeScript config files.
+Use `--profile node`, `--profile next`, `--profile go`, or `--profile rust`
+when the repository shape should be selected explicitly.
 
 Create a JSON document proposal template with:
 
@@ -168,11 +175,14 @@ they should be treated as universally portable:
 - `verify-elegance-review`
 
 `hrns list` shows each audit as `active`, `inactive`, or `needs config`.
+Use `hrns list --json` for scripts and dashboards.
 `hrns explain <audit-name>` prints what the audit checks, which config keys it
 uses, its current status, and what a failure means.
 
 Ledger validation is delegated to `ldgr verify`; hrns does not duplicate ledger
-state-model rules. Project-local runtime preflights, such as Agent-Zero
+state-model rules. Run `hrns audit --with-ldgr` when a repository should pass
+both repository guardrails and ldgr's ledger verification in one command.
+Project-local runtime preflights, such as Agent-Zero
 watchdog checks, should live in that project's own runbook rather than in hrns.
 Upstream drift checks are project-specific and should be configured outside the
 portable default audit set.

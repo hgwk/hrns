@@ -1,6 +1,7 @@
 package hrns
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,6 +14,9 @@ func defaultRunLdgrVerify() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return fmt.Errorf("ldgr verify: ldgr not found; install @hgwk/ldgr or run without --with-ldgr")
+		}
 		return fmt.Errorf("ldgr verify: %w", err)
 	}
 	return nil

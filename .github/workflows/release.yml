@@ -32,6 +32,15 @@ jobs:
         run: go test ./... -count=1 -race
       - name: audit
         run: go run ./cmd/hrns audit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: npm package smoke
+        run: |
+          node -c bin/install.js
+          sh -n bin/hrns
+          npm pack --dry-run
 
   build:
     needs: quality
