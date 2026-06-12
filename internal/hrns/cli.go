@@ -66,7 +66,7 @@ func Run(args []string) error {
 	}
 	switch cmd {
 	case "list":
-		printList(cfg)
+		printList(cfg, contains(args, "--verbose") || contains(args, "-v"))
 	case "init":
 		return initCommand(args)
 	case "audit":
@@ -116,7 +116,7 @@ Usage:
   hrns run <audit-name>
   hrns explain <audit-name>
   hrns init [--docs] [--instructions]
-  hrns list
+  hrns list [--verbose]
   hrns version
 
 Commands:
@@ -147,7 +147,7 @@ func printCommandHelp(cmd string) {
 	case "line-audit":
 		fmt.Println("usage: hrns line-audit")
 	case "list":
-		fmt.Println("usage: hrns list")
+		fmt.Println("usage: hrns list [--verbose]")
 	case "version":
 		fmt.Println("usage: hrns version")
 	default:
@@ -159,14 +159,14 @@ func isHelp(value string) bool {
 	return value == "help" || value == "--help" || value == "-h"
 }
 
-func printList(cfg Config) {
+func printList(cfg Config, verbose bool) {
 	fmt.Println("Stable audits:")
 	for _, name := range stableAudits {
-		fmt.Printf("- %s [%s]\n", name, auditStatus(name, cfg))
+		printAuditListItem(name, cfg, verbose)
 	}
 	fmt.Println("\nConfigurable audits:")
 	for _, name := range allAudits[len(stableAudits):] {
-		fmt.Printf("- %s [%s]\n", name, auditStatus(name, cfg))
+		printAuditListItem(name, cfg, verbose)
 	}
 	fmt.Println("\nConfigured default audit set:")
 	audits := cfg.AuditSets.Default
@@ -175,7 +175,22 @@ func printList(cfg Config) {
 	}
 	for _, name := range audits {
 		normalized := normalizeAuditName(name)
-		fmt.Printf("- %s [%s]\n", normalized, auditStatus(normalized, cfg))
+		printAuditListItem(normalized, cfg, verbose)
+	}
+}
+
+func printAuditListItem(name string, cfg Config, verbose bool) {
+	status := auditStatus(name, cfg)
+	fmt.Printf("- %s [%s]\n", name, status)
+	if !verbose {
+		return
+	}
+	if info, ok := auditCatalog[normalizeAuditName(name)]; ok {
+		fmt.Printf("  config: %s\n", info.Config)
+		fmt.Printf("  failure: %s\n", info.Failure)
+		if status == "needs config" {
+			fmt.Printf("  next: configure %s or remove this audit from the active set\n", info.Config)
+		}
 	}
 }
 
