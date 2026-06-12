@@ -66,11 +66,15 @@ func Run(args []string) error {
 	}
 	switch cmd {
 	case "list":
+		if contains(args, "--json") {
+			return printListJSON(cfg)
+		}
 		printList(cfg, contains(args, "--verbose") || contains(args, "-v"))
 	case "init":
 		return initCommand(args)
 	case "audit":
 		includeAll := contains(args, "--all")
+		withLdgr := contains(args, "--with-ldgr")
 		audits := cfg.AuditSets.Default
 		if len(audits) == 0 {
 			audits = stableAudits
@@ -81,7 +85,13 @@ func Run(args []string) error {
 				audits = allAudits
 			}
 		}
-		return runMany(audits, cfg)
+		if err := runMany(audits, cfg); err != nil {
+			return err
+		}
+		if withLdgr {
+			return runLdgrVerify()
+		}
+		return nil
 	case "run":
 		if len(args) == 0 {
 			return fmt.Errorf("usage: hrns run <audit-name>")
@@ -112,11 +122,11 @@ func printHelp() {
 
 Usage:
   hrns [audit]
-  hrns audit [--all]
+  hrns audit [--all] [--with-ldgr]
   hrns run <audit-name>
   hrns explain <audit-name>
-  hrns init [--docs] [--instructions]
-  hrns list [--verbose]
+  hrns init [--docs] [--instructions] [--profile node|go|rust|next]
+  hrns list [--verbose] [--json]
   hrns version
 
 Commands:
@@ -133,13 +143,13 @@ Commands:
 func printCommandHelp(cmd string) {
 	switch cmd {
 	case "audit":
-		fmt.Println("usage: hrns audit [--all]")
+		fmt.Println("usage: hrns audit [--all] [--with-ldgr]")
 	case "run":
 		fmt.Println("usage: hrns run <audit-name>")
 	case "explain":
 		fmt.Println("usage: hrns explain <audit-name>")
 	case "init":
-		fmt.Println("usage: hrns init [--docs] [--instructions]")
+		fmt.Println("usage: hrns init [--docs] [--instructions] [--profile node|go|rust|next]")
 	case "docs:check":
 		fmt.Println("usage: hrns docs:check [proposal-json]")
 	case "docs:index":
@@ -147,7 +157,7 @@ func printCommandHelp(cmd string) {
 	case "line-audit":
 		fmt.Println("usage: hrns line-audit")
 	case "list":
-		fmt.Println("usage: hrns list [--verbose]")
+		fmt.Println("usage: hrns list [--verbose] [--json]")
 	case "version":
 		fmt.Println("usage: hrns version")
 	default:
@@ -157,41 +167,6 @@ func printCommandHelp(cmd string) {
 
 func isHelp(value string) bool {
 	return value == "help" || value == "--help" || value == "-h"
-}
-
-func printList(cfg Config, verbose bool) {
-	fmt.Println("Stable audits:")
-	for _, name := range stableAudits {
-		printAuditListItem(name, cfg, verbose)
-	}
-	fmt.Println("\nConfigurable audits:")
-	for _, name := range allAudits[len(stableAudits):] {
-		printAuditListItem(name, cfg, verbose)
-	}
-	fmt.Println("\nConfigured default audit set:")
-	audits := cfg.AuditSets.Default
-	if len(audits) == 0 {
-		audits = stableAudits
-	}
-	for _, name := range audits {
-		normalized := normalizeAuditName(name)
-		printAuditListItem(normalized, cfg, verbose)
-	}
-}
-
-func printAuditListItem(name string, cfg Config, verbose bool) {
-	status := auditStatus(name, cfg)
-	fmt.Printf("- %s [%s]\n", name, status)
-	if !verbose {
-		return
-	}
-	if info, ok := auditCatalog[normalizeAuditName(name)]; ok {
-		fmt.Printf("  config: %s\n", info.Config)
-		fmt.Printf("  failure: %s\n", info.Failure)
-		if status == "needs config" {
-			fmt.Printf("  next: configure %s or remove this audit from the active set\n", info.Config)
-		}
-	}
 }
 
 func runMany(audits []string, cfg Config) error {

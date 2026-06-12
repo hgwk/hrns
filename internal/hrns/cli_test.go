@@ -2,6 +2,7 @@ package hrns
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"os"
 	"strings"
@@ -104,6 +105,73 @@ func TestRunListShowsAuditStatus(t *testing.T) {
 	}
 }
 
+func TestRunListJSON(t *testing.T) {
+	dir := t.TempDir()
+	withCwd(t, dir)
+
+	stdout := captureStdout(t, func() {
+		if err := Run([]string{"list", "--json"}); err != nil {
+			t.Fatalf("Run(list --json): %v", err)
+		}
+	})
+	var payload struct {
+		Stable []struct {
+			Name   string `json:"name"`
+			Status string `json:"status"`
+		} `json:"stable"`
+	}
+	if err := json.Unmarshal([]byte(stdout), &payload); err != nil {
+		t.Fatalf("invalid json: %v\n%s", err, stdout)
+	}
+	if len(payload.Stable) == 0 || payload.Stable[0].Name != "verify-line-count" {
+		t.Fatalf("unexpected payload: %+v", payload)
+	}
+}
+
+func TestRunAuditWithLdgrRunsAdapterAfterAudits(t *testing.T) {
+	dir := t.TempDir()
+	withCwd(t, dir)
+	if err := os.Mkdir("cmd", 0o755); err != nil {
+		t.Fatalf("mkdir cmd: %v", err)
+	}
+	touch(t, "cmd/ok.go")
+
+	called := false
+	old := runLdgrVerify
+	runLdgrVerify = func() error {
+		called = true
+		return nil
+	}
+	t.Cleanup(func() { runLdgrVerify = old })
+
+	if err := Run([]string{"audit", "--with-ldgr"}); err != nil {
+		t.Fatalf("Run(audit --with-ldgr): %v", err)
+	}
+	if !called {
+		t.Fatalf("expected ldgr adapter to run")
+	}
+}
+
+func TestInitProfileGoWritesGoRoots(t *testing.T) {
+	dir := t.TempDir()
+	withCwd(t, dir)
+
+	if err := Run([]string{"init", "--profile", "go"}); err != nil {
+		t.Fatalf("Run(init --profile go): %v", err)
+	}
+	data, err := os.ReadFile("hrns.config.json")
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		t.Fatalf("parse config: %v", err)
+	}
+	if !contains(cfg.LineAudit.Extensions, ".go") || contains(cfg.LineAudit.Extensions, ".tsx") {
+		t.Fatalf("unexpected go profile extensions: %+v", cfg.LineAudit.Extensions)
+	}
+}
+
 func TestLineAuditFailsWhenNoFilesScanned(t *testing.T) {
 	dir := t.TempDir()
 	withCwd(t, dir)
@@ -115,6 +183,13 @@ func TestLineAuditFailsWhenNoFilesScanned(t *testing.T) {
 	}})
 	if err == nil || !strings.Contains(err.Error(), "0 files scanned") {
 		t.Fatalf("expected zero-scan failure, got %v", err)
+	}
+}
+
+func touch(t *testing.T, path string) {
+	t.Helper()
+	if err := os.WriteFile(path, []byte("package main\n"), 0o644); err != nil {
+		t.Fatalf("write %s: %v", path, err)
 	}
 }
 
