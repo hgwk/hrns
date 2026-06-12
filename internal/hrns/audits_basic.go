@@ -19,6 +19,9 @@ func RunLineAudit(cfg Config) error {
 	}
 	exts := stringSet(cfg.LineAudit.Extensions)
 	files := ListFiles(cfg.LineAudit.Roots, exts)
+	if len(files) == 0 {
+		return fmt.Errorf("line-audit: FAIL (0 files scanned; check lineAudit.roots and extensions)")
+	}
 	type item struct {
 		file  string
 		lines int

@@ -38,18 +38,26 @@ var allAudits = []string{
 	"verify-elegance-review",
 }
 
-var Version = "0.1.1"
+var Version = "0.1.2"
 
 func Run(args []string) error {
 	cmd := "audit"
 	if len(args) > 0 {
 		cmd, args = args[0], args[1:]
 	}
+	if isHelp(cmd) {
+		printHelp()
+		return nil
+	}
 	if cmd == "version" || cmd == "--version" || cmd == "-V" {
 		if len(args) > 0 {
 			return fmt.Errorf("usage: hrns version")
 		}
 		fmt.Printf("hrns %s\n", Version)
+		return nil
+	}
+	if len(args) > 0 && isHelp(args[0]) {
+		printCommandHelp(cmd)
 		return nil
 	}
 	cfg, err := LoadConfig(".")
@@ -92,6 +100,54 @@ func Run(args []string) error {
 		return fmt.Errorf("unknown command: %s", cmd)
 	}
 	return nil
+}
+
+func printHelp() {
+	fmt.Println(`hrns audits repository guardrails.
+
+Usage:
+  hrns [audit]
+  hrns audit [--all]
+  hrns run <audit-name>
+  hrns init [--docs] [--instructions]
+  hrns list
+  hrns version
+
+Commands:
+  audit        Run the configured default audit set
+  run          Run one audit by name
+  list         List stable and configurable audits
+  init         Create hrns config/docs/instruction files
+  docs:index   Build the document similarity index
+  docs:check   Check a proposed Markdown document
+  version      Print the installed version`)
+}
+
+func printCommandHelp(cmd string) {
+	switch cmd {
+	case "audit":
+		fmt.Println("usage: hrns audit [--all]")
+	case "run":
+		fmt.Println("usage: hrns run <audit-name>")
+	case "init":
+		fmt.Println("usage: hrns init [--docs] [--instructions]")
+	case "docs:check":
+		fmt.Println("usage: hrns docs:check [proposal-json]")
+	case "docs:index":
+		fmt.Println("usage: hrns docs:index")
+	case "line-audit":
+		fmt.Println("usage: hrns line-audit")
+	case "list":
+		fmt.Println("usage: hrns list")
+	case "version":
+		fmt.Println("usage: hrns version")
+	default:
+		printHelp()
+	}
+}
+
+func isHelp(value string) bool {
+	return value == "help" || value == "--help" || value == "-h"
 }
 
 func printList(cfg Config) {
