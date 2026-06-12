@@ -66,6 +66,42 @@ func TestRunTopLevelHelp(t *testing.T) {
 	if !strings.Contains(stdout, "hrns audit [--all]") {
 		t.Fatalf("top-level help missing audit usage: %s", stdout)
 	}
+	if !strings.Contains(stdout, "hrns explain <audit-name>") {
+		t.Fatalf("top-level help missing explain usage: %s", stdout)
+	}
+}
+
+func TestRunExplainAudit(t *testing.T) {
+	dir := t.TempDir()
+	withCwd(t, dir)
+
+	stdout := captureStdout(t, func() {
+		if err := Run([]string{"explain", "verify-line-count"}); err != nil {
+			t.Fatalf("Run(explain): %v", err)
+		}
+	})
+	for _, want := range []string{"verify-line-count", "status: active", "lineAudit.maxLines"} {
+		if !strings.Contains(stdout, want) {
+			t.Fatalf("explain output missing %q:\n%s", want, stdout)
+		}
+	}
+}
+
+func TestRunListShowsAuditStatus(t *testing.T) {
+	dir := t.TempDir()
+	withCwd(t, dir)
+
+	stdout := captureStdout(t, func() {
+		if err := Run([]string{"list"}); err != nil {
+			t.Fatalf("Run(list): %v", err)
+		}
+	})
+	if !strings.Contains(stdout, "verify-line-count [active]") {
+		t.Fatalf("list missing active status:\n%s", stdout)
+	}
+	if !strings.Contains(stdout, "verify-forbidden-references [needs config]") {
+		t.Fatalf("list missing needs config status:\n%s", stdout)
+	}
 }
 
 func TestLineAuditFailsWhenNoFilesScanned(t *testing.T) {

@@ -87,6 +87,11 @@ func Run(args []string) error {
 			return fmt.Errorf("usage: hrns run <audit-name>")
 		}
 		return runOne(normalizeAuditName(args[0]), cfg)
+	case "explain":
+		if len(args) == 0 {
+			return fmt.Errorf("usage: hrns explain <audit-name>")
+		}
+		return explainAudit(args[0], cfg)
 	case "line-audit":
 		return RunLineAudit(cfg)
 	case "docs:index":
@@ -109,6 +114,7 @@ Usage:
   hrns [audit]
   hrns audit [--all]
   hrns run <audit-name>
+  hrns explain <audit-name>
   hrns init [--docs] [--instructions]
   hrns list
   hrns version
@@ -116,6 +122,7 @@ Usage:
 Commands:
   audit        Run the configured default audit set
   run          Run one audit by name
+  explain      Explain one audit's purpose, config, status, and failure shape
   list         List stable and configurable audits
   init         Create hrns config/docs/instruction files
   docs:index   Build the document similarity index
@@ -129,6 +136,8 @@ func printCommandHelp(cmd string) {
 		fmt.Println("usage: hrns audit [--all]")
 	case "run":
 		fmt.Println("usage: hrns run <audit-name>")
+	case "explain":
+		fmt.Println("usage: hrns explain <audit-name>")
 	case "init":
 		fmt.Println("usage: hrns init [--docs] [--instructions]")
 	case "docs:check":
@@ -153,11 +162,11 @@ func isHelp(value string) bool {
 func printList(cfg Config) {
 	fmt.Println("Stable audits:")
 	for _, name := range stableAudits {
-		fmt.Printf("- %s\n", name)
+		fmt.Printf("- %s [%s]\n", name, auditStatus(name, cfg))
 	}
 	fmt.Println("\nConfigurable audits:")
 	for _, name := range allAudits[len(stableAudits):] {
-		fmt.Printf("- %s\n", name)
+		fmt.Printf("- %s [%s]\n", name, auditStatus(name, cfg))
 	}
 	fmt.Println("\nConfigured default audit set:")
 	audits := cfg.AuditSets.Default
@@ -165,7 +174,8 @@ func printList(cfg Config) {
 		audits = stableAudits
 	}
 	for _, name := range audits {
-		fmt.Printf("- %s\n", normalizeAuditName(name))
+		normalized := normalizeAuditName(name)
+		fmt.Printf("- %s [%s]\n", normalized, auditStatus(normalized, cfg))
 	}
 }
 

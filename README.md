@@ -15,6 +15,7 @@ go install github.com/hgwk/hrns/cmd/hrns@latest
 hrns version
 hrns init --docs --instructions
 hrns list
+hrns explain verify-line-count
 hrns audit
 ```
 
@@ -32,6 +33,7 @@ Local development in this repository:
 ```sh
 go run ./cmd/hrns version
 go run ./cmd/hrns list
+go run ./cmd/hrns explain verify-line-count
 go run ./cmd/hrns audit
 go run ./cmd/hrns audit --all
 ```
@@ -164,6 +166,10 @@ they should be treated as universally portable:
 - `verify-main-diff-scope`
 - `verify-stop-rule`
 - `verify-elegance-review`
+
+`hrns list` shows each audit as `active`, `inactive`, or `needs config`.
+`hrns explain <audit-name>` prints what the audit checks, which config keys it
+uses, its current status, and what a failure means.
 
 Ledger validation is delegated to `ldgr verify`; hrns does not duplicate ledger
 state-model rules. Project-local runtime preflights, such as Agent-Zero
