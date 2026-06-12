@@ -18,6 +18,15 @@ hrns list
 hrns audit
 ```
 
+For local development and manual installs, use this shared convention:
+
+```sh
+install -m 0755 hrns ~/.local/bin/hrns
+```
+
+If another PATH directory must expose `hrns`, prefer a symlink back to
+`~/.local/bin/hrns` instead of copying multiple binaries.
+
 Local development in this repository:
 
 ```sh
@@ -26,6 +35,12 @@ go run ./cmd/hrns list
 go run ./cmd/hrns audit
 go run ./cmd/hrns audit --all
 ```
+
+## Companion Tool Roles
+
+- `cduo doctor` checks pair-agent runtime setup and project hook readiness.
+- `ldgr verify` checks ledger lifecycle, audit, worklog, and Git evidence.
+- `hrns audit` checks repository structure, docs, config, and code guardrails.
 
 ## Configuration
 
@@ -114,6 +129,10 @@ absolute `@.../.hrns/audit-guide.md` pointer. `AGENTS.md` and `CLAUDE.md` are
 both ensured by default; existing body content is preserved below the pointer.
 Set `HRNS_HOME` to override the home-local directory in tests or isolated
 environments.
+
+This is the shared guide-pointer convention used by `cduo`, `ldgr`, and `hrns`:
+the home-local guide holds the long body, while root policy files only carry the
+absolute `@...` pointer and any project-local rules below it.
 
 ## Audit Sets
 
