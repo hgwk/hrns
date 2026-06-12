@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.3 - 2026-06-12
+
+### Changed
+
+- Add npm postinstall binary downloader for GitHub Release assets.
+- Refine audit catalog config detection so inactive audits do not look runnable.
+- Keep npm package contents scoped to the CLI runtime files.
+
 ## v0.1.2 - 2026-06-12
 
 ### Changed
