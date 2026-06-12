@@ -13,12 +13,11 @@
     "cmd/",
     "internal/",
     "go.mod",
-    "packages/e2e/helpers/servers.ts",
-    "packages/desktop/test/desktop-wire-smoke.ts",
-    "packages/desktop/test/desktop-wire-smoke-matrix.ts",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
+    "postinstall": "node ./bin/install.js",
     "audit": "go run ./cmd/hrns audit",
     "audit:all": "go run ./cmd/hrns audit --all",
     "list": "go run ./cmd/hrns list",

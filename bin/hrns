@@ -12,6 +12,14 @@ while [ -L "$SCRIPT" ]; do
 done
 DIR=$(CDPATH= cd -- "$(dirname -- "$SCRIPT")" && pwd)
 TARGET_ROOT=$(pwd)
+NATIVE="$DIR/native/hrns"
+if [ -x "$NATIVE" ]; then
+  case "$CMD" in
+    hrns-line-audit) exec env HRNS_TARGET_ROOT="$TARGET_ROOT" "$NATIVE" line-audit "$@" ;;
+    hrns-audit) exec env HRNS_TARGET_ROOT="$TARGET_ROOT" "$NATIVE" audit "$@" ;;
+  esac
+  exec env HRNS_TARGET_ROOT="$TARGET_ROOT" "$NATIVE" "$@"
+fi
 cd "$DIR/.."
 case "$CMD" in
   hrns-line-audit) exec env HRNS_TARGET_ROOT="$TARGET_ROOT" go run ./cmd/hrns line-audit "$@" ;;

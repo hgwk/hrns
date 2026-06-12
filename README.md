@@ -222,8 +222,10 @@ Keep runnable generic checks in the Go CLI under `cmd/hrns` and `internal/hrns`.
 Checks should read the target repository from the current working directory.
 
 Primary distribution is the Go module plus GitHub Release tarballs named
-`hrns_<version>_<os>_<arch>.tar.gz`. The npm package keeps a thin compatibility
-wrapper that shells to `go run`, so npm consumers need Go installed.
+`hrns_<version>_<os>_<arch>.tar.gz`. The npm package downloads the matching
+release binary during `postinstall`; its shell wrapper falls back to `go run`
+only when the native binary is absent, which is mainly useful for local source
+development.
 
 Project-specific defaults belong in `hrns.config.json` or `package.json#hrns`
 instead of being hard-coded in each verifier.
