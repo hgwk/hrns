@@ -17,7 +17,7 @@ func defaultRunLdgrVerify() error {
 		if errors.Is(err, exec.ErrNotFound) {
 			return fmt.Errorf("ldgr verify: ldgr not found; install @hgwk/ldgr or run without --with-ldgr")
 		}
-		return fmt.Errorf("ldgr verify: %w", err)
+		return fmt.Errorf("ldgr verify: %w; initialize this target with `ldgr init` or run without --with-ldgr for hrns-only audits", err)
 	}
 	return nil
 }
