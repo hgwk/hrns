@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.26"
+          go-version-file: go.mod
           cache: false
       - name: gofmt
         run: |
@@ -41,6 +41,9 @@ jobs:
           node -c bin/install.js
           sh -n bin/hrns
           npm run list:json >/tmp/hrns-list.json
+          npm install -g @hgwk/ldgr
+          ldgr init --target . --home /tmp/ldgr-home
+          npm run audit:ldgr
           npm pack --dry-run
 
   build:
@@ -61,7 +64,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.26"
+          go-version-file: go.mod
           cache: false
       - name: build
         env:

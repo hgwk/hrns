@@ -12,6 +12,7 @@
     "bin/",
     "cmd/",
     "internal/",
+    "schemas/",
     "go.mod",
     "README.md",
     "LICENSE"

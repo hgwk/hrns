@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -130,6 +131,32 @@ func TestRunListJSON(t *testing.T) {
 	}
 	if payload.SchemaVersion != 1 || payload.StableCount != len(payload.Stable) {
 		t.Fatalf("unexpected list metadata: %+v", payload)
+	}
+}
+
+func TestRunListTarget(t *testing.T) {
+	dir := t.TempDir()
+	stdout := captureStdout(t, func() {
+		if err := Run([]string{"list", "--target", dir, "--json"}); err != nil {
+			t.Fatalf("Run(list --target --json): %v", err)
+		}
+	})
+	if !strings.Contains(stdout, `"schema_version": 1`) {
+		t.Fatalf("target list should emit json, got %s", stdout)
+	}
+}
+
+func TestRunInitTarget(t *testing.T) {
+	dir := t.TempDir()
+	if err := Run([]string{"init", "--target", dir, "--profile", "go"}); err != nil {
+		t.Fatalf("Run(init --target): %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "hrns.config.json"))
+	if err != nil {
+		t.Fatalf("expected target config: %v", err)
+	}
+	if !strings.Contains(string(data), `"cmd"`) {
+		t.Fatalf("expected go profile config, got %s", data)
 	}
 }
 

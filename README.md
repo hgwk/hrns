@@ -40,6 +40,7 @@ go run ./cmd/hrns explain verify-line-count
 go run ./cmd/hrns audit
 go run ./cmd/hrns audit --all
 go run ./cmd/hrns audit --with-ldgr
+go run ./cmd/hrns audit --target ../other-repo
 npm run list:json
 npm run audit:ldgr
 ```
@@ -178,7 +179,8 @@ they should be treated as universally portable:
 
 `hrns list` shows each audit as `active`, `inactive`, or `needs config`.
 Use `hrns list --json` for scripts and dashboards.
-The JSON output is schema-versioned:
+The JSON output is schema-versioned. The formal contract lives in
+`schemas/list.schema.json`:
 
 ```json
 {
@@ -198,6 +200,8 @@ uses, its current status, and what a failure means.
 Ledger validation is delegated to `ldgr verify`; hrns does not duplicate ledger
 state-model rules. Run `hrns audit --with-ldgr` when a repository should pass
 both repository guardrails and ldgr's ledger verification in one command.
+The repository must already be initialized with `ldgr init`; otherwise the
+ldgr portion correctly fails because no ledger state exists.
 Project-local runtime preflights, such as Agent-Zero
 watchdog checks, should live in that project's own runbook rather than in hrns.
 Upstream drift checks are project-specific and should be configured outside the

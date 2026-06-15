@@ -60,6 +60,15 @@ func Run(args []string) error {
 		printCommandHelp(cmd)
 		return nil
 	}
+	target, args, err := parseTargetArg(args)
+	if err != nil {
+		return err
+	}
+	restore, err := chdirTarget(target)
+	if err != nil {
+		return err
+	}
+	defer restore()
 	cfg, err := LoadConfig(".")
 	if err != nil {
 		return err
@@ -122,11 +131,11 @@ func printHelp() {
 
 Usage:
   hrns [audit]
-  hrns audit [--all] [--with-ldgr]
-  hrns run <audit-name>
-  hrns explain <audit-name>
-  hrns init [--docs] [--instructions] [--profile node|go|rust|next]
-  hrns list [--verbose] [--json]
+  hrns audit [--all] [--with-ldgr] [--target PATH]
+  hrns run <audit-name> [--target PATH]
+  hrns explain <audit-name> [--target PATH]
+  hrns init [--docs] [--instructions] [--profile node|go|rust|next] [--target PATH]
+  hrns list [--verbose] [--json] [--target PATH]
   hrns version
 
 Commands:
@@ -143,21 +152,21 @@ Commands:
 func printCommandHelp(cmd string) {
 	switch cmd {
 	case "audit":
-		fmt.Println("usage: hrns audit [--all] [--with-ldgr]")
+		fmt.Println("usage: hrns audit [--all] [--with-ldgr] [--target PATH]")
 	case "run":
-		fmt.Println("usage: hrns run <audit-name>")
+		fmt.Println("usage: hrns run <audit-name> [--target PATH]")
 	case "explain":
-		fmt.Println("usage: hrns explain <audit-name>")
+		fmt.Println("usage: hrns explain <audit-name> [--target PATH]")
 	case "init":
-		fmt.Println("usage: hrns init [--docs] [--instructions] [--profile node|go|rust|next]")
+		fmt.Println("usage: hrns init [--docs] [--instructions] [--profile node|go|rust|next] [--target PATH]")
 	case "docs:check":
-		fmt.Println("usage: hrns docs:check [proposal-json]")
+		fmt.Println("usage: hrns docs:check [proposal-json] [--target PATH]")
 	case "docs:index":
-		fmt.Println("usage: hrns docs:index")
+		fmt.Println("usage: hrns docs:index [--target PATH]")
 	case "line-audit":
-		fmt.Println("usage: hrns line-audit")
+		fmt.Println("usage: hrns line-audit [--target PATH]")
 	case "list":
-		fmt.Println("usage: hrns list [--verbose] [--json]")
+		fmt.Println("usage: hrns list [--verbose] [--json] [--target PATH]")
 	case "version":
 		fmt.Println("usage: hrns version")
 	default:

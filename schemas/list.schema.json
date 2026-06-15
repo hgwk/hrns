@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hgwk.github.io/hrns/schemas/list.schema.json",
+  "title": "hrns list JSON",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "stable_count",
+    "configurable_count",
+    "default_count",
+    "stable",
+    "configurable",
+    "default"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "stable_count": { "type": "integer", "minimum": 0 },
+    "configurable_count": { "type": "integer", "minimum": 0 },
+    "default_count": { "type": "integer", "minimum": 0 },
+    "stable": { "$ref": "#/$defs/auditItems" },
+    "configurable": { "$ref": "#/$defs/auditItems" },
+    "default": { "$ref": "#/$defs/auditItems" }
+  },
+  "$defs": {
+    "auditItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "category", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "category": { "enum": ["stable", "configurable", "default"] },
+          "status": { "enum": ["active", "inactive", "needs config"] },
+          "config": { "type": "string" },
+          "failure": { "type": "string" }
+        }
+      }
+    }
+  }
+}
