@@ -20,7 +20,9 @@
     "postinstall": "node ./bin/install.js",
     "audit": "go run ./cmd/hrns audit",
     "audit:all": "go run ./cmd/hrns audit --all",
+    "audit:ldgr": "go run ./cmd/hrns audit --with-ldgr",
     "list": "go run ./cmd/hrns list",
+    "list:json": "go run ./cmd/hrns list --json",
     "line-audit": "go run ./cmd/hrns line-audit"
   },
   "hrns": {

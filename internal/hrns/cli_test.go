@@ -115,7 +115,9 @@ func TestRunListJSON(t *testing.T) {
 		}
 	})
 	var payload struct {
-		Stable []struct {
+		SchemaVersion int `json:"schema_version"`
+		StableCount   int `json:"stable_count"`
+		Stable        []struct {
 			Name   string `json:"name"`
 			Status string `json:"status"`
 		} `json:"stable"`
@@ -125,6 +127,9 @@ func TestRunListJSON(t *testing.T) {
 	}
 	if len(payload.Stable) == 0 || payload.Stable[0].Name != "verify-line-count" {
 		t.Fatalf("unexpected payload: %+v", payload)
+	}
+	if payload.SchemaVersion != 1 || payload.StableCount != len(payload.Stable) {
+		t.Fatalf("unexpected list metadata: %+v", payload)
 	}
 }
 

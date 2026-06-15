@@ -40,6 +40,8 @@ go run ./cmd/hrns explain verify-line-count
 go run ./cmd/hrns audit
 go run ./cmd/hrns audit --all
 go run ./cmd/hrns audit --with-ldgr
+npm run list:json
+npm run audit:ldgr
 ```
 
 ## Companion Tool Roles
@@ -176,6 +178,20 @@ they should be treated as universally portable:
 
 `hrns list` shows each audit as `active`, `inactive`, or `needs config`.
 Use `hrns list --json` for scripts and dashboards.
+The JSON output is schema-versioned:
+
+```json
+{
+  "schema_version": 1,
+  "stable_count": 6,
+  "configurable_count": 15,
+  "default_count": 6,
+  "stable": [],
+  "configurable": [],
+  "default": []
+}
+```
+
 `hrns explain <audit-name>` prints what the audit checks, which config keys it
 uses, its current status, and what a failure means.
 

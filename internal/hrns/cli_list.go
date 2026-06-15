@@ -34,21 +34,29 @@ type listAuditItem struct {
 }
 
 type listJSONPayload struct {
-	Stable       []listAuditItem `json:"stable"`
-	Configurable []listAuditItem `json:"configurable"`
-	Default      []listAuditItem `json:"default"`
+	SchemaVersion     int             `json:"schema_version"`
+	StableCount       int             `json:"stable_count"`
+	ConfigurableCount int             `json:"configurable_count"`
+	DefaultCount      int             `json:"default_count"`
+	Stable            []listAuditItem `json:"stable"`
+	Configurable      []listAuditItem `json:"configurable"`
+	Default           []listAuditItem `json:"default"`
 }
 
 func printListJSON(cfg Config) error {
 	payload := listJSONPayload{
-		Stable:       auditItems(stableAudits, "stable", cfg),
-		Configurable: auditItems(allAudits[len(stableAudits):], "configurable", cfg),
+		SchemaVersion: 1,
+		Stable:        auditItems(stableAudits, "stable", cfg),
+		Configurable:  auditItems(allAudits[len(stableAudits):], "configurable", cfg),
 	}
 	audits := cfg.AuditSets.Default
 	if len(audits) == 0 {
 		audits = stableAudits
 	}
 	payload.Default = auditItems(audits, "default", cfg)
+	payload.StableCount = len(payload.Stable)
+	payload.ConfigurableCount = len(payload.Configurable)
+	payload.DefaultCount = len(payload.Default)
 	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		return err

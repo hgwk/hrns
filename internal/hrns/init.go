@@ -33,7 +33,11 @@ func initCommand(args []string) error {
 func initConfig(profile string) error {
 	target := "hrns.config.json"
 	if Exists(target) {
-		fmt.Println("hrns.config.json already exists")
+		if profile != "" {
+			fmt.Printf("hrns.config.json already exists; --profile %s was not applied\n", profile)
+		} else {
+			fmt.Println("hrns.config.json already exists")
+		}
 		return nil
 	}
 	wd, err := os.Getwd()
