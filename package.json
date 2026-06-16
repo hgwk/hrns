@@ -1,6 +1,6 @@
 {
   "name": "@hgwk/hrns",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Portable repository audit and test harness CLI.",
   "license": "MIT",
   "bin": {

@@ -147,7 +147,7 @@ func TestRunListTarget(t *testing.T) {
 }
 
 func TestRunInitTarget(t *testing.T) {
-	dir := t.TempDir()
+	dir := filepath.Join(t.TempDir(), "new-project")
 	home := t.TempDir()
 	t.Setenv("HRNS_HOME", filepath.Join(home, ".hrns"))
 	if err := Run([]string{"init", "--target", dir, "--profile", "go"}); err != nil {

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.6 - 2026-06-16
+
+### Changed
+
+- Let `hrns init --target <path>` create the target directory when it does not
+  exist, matching other init automation flows.
+
 ## v0.1.5 - 2026-06-16
 
 ### Changed

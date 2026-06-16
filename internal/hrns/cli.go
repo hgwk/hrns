@@ -38,7 +38,7 @@ var allAudits = []string{
 	"verify-elegance-review",
 }
 
-var Version = "0.1.5"
+var Version = "0.1.6"
 
 func Run(args []string) error {
 	cmd := "audit"
@@ -63,6 +63,11 @@ func Run(args []string) error {
 	target, args, err := parseTargetArg(args)
 	if err != nil {
 		return err
+	}
+	if cmd == "init" {
+		if err := os.MkdirAll(target, 0o755); err != nil {
+			return fmt.Errorf("target %s: %w", target, err)
+		}
 	}
 	restore, err := chdirTarget(target)
 	if err != nil {
