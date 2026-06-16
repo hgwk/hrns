@@ -64,6 +64,15 @@ func Run(args []string) error {
 	if err != nil {
 		return err
 	}
+	home, args, err := parseHomeArg(args)
+	if err != nil {
+		return err
+	}
+	restoreHome, err := setHomeOverride(home)
+	if err != nil {
+		return err
+	}
+	defer restoreHome()
 	if cmd == "init" {
 		if err := os.MkdirAll(target, 0o755); err != nil {
 			return fmt.Errorf("target %s: %w", target, err)

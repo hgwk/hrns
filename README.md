@@ -80,7 +80,8 @@ hrns init
 ```
 
 Use `--no-instructions` only when a repository intentionally does not want hrns
-agent guide pointers.
+agent guide pointers. Use `hrns init --home <path>` to override the guide
+directory for isolated automation.
 
 The CLI also reads `package.json#hrns`. `hrns.config.json` wins over
 `package.json#hrns`.
@@ -142,8 +143,8 @@ Instruction injection matches cduo/ldgr prelude behavior. The actual rules live
 in `~/.hrns/audit-guide.md`, and root policy files get only a top-of-file
 absolute `@.../.hrns/audit-guide.md` pointer. `AGENTS.md` and `CLAUDE.md` are
 both ensured by default; existing body content is preserved below the pointer.
-Set `HRNS_HOME` to override the home-local directory in tests or isolated
-environments.
+Set `HRNS_HOME` or pass `hrns init --home <path>` to override the home-local
+directory in tests or isolated environments.
 
 This is the shared guide-pointer convention used by `cduo`, `ldgr`, and `hrns`:
 the home-local guide holds the long body, while root policy files only carry the
