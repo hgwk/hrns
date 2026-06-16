@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.8 - 2026-06-16
+
+### Changed
+
+- Add `hrns init --home <path>` for isolated automation, matching the shared
+  guide-pointer init flow.
+- Split init-related CLI tests so repository line-count guardrails remain under
+  300 lines per file.
+
 ## v0.1.7 - 2026-06-16
 
 ### Fixed
