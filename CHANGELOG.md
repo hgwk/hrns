@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.7 - 2026-06-16
+
+### Fixed
+
+- Resolve Markdown links relative to the document that contains them.
+- Ignore Markdown links inside fenced code blocks during docs symbol sync.
+
 ## v0.1.6 - 2026-06-16
 
 ### Changed

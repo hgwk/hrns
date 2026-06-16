@@ -51,7 +51,7 @@ func RunDocsSymbolSync(cfg Config) error {
 		if !strings.HasSuffix(file, ".md") {
 			continue
 		}
-		for _, match := range linkRe.FindAllStringSubmatch(ReadText(file), -1) {
+		for _, match := range linkRe.FindAllStringSubmatch(stripFencedCode(ReadText(file)), -1) {
 			ref := strings.Trim(match[1], "<>")
 			if strings.HasPrefix(ref, "http:") || strings.HasPrefix(ref, "https:") ||
 				strings.HasPrefix(ref, "mailto:") || strings.HasPrefix(ref, "#") {
@@ -60,16 +60,29 @@ func RunDocsSymbolSync(cfg Config) error {
 			if strings.HasPrefix(ref, "/") || strings.Contains(ref, "*") {
 				continue
 			}
-			base := ""
-			if strings.HasPrefix(ref, "./") || strings.HasPrefix(ref, "../") {
-				base = filepath.Dir(file)
-			}
+			base := filepath.Dir(file)
 			if !Exists(filepath.Clean(filepath.Join(base, ref))) {
 				a.Fail(file+": missing referenced artifact", ref)
 			}
 		}
 	}
 	return a.Finish()
+}
+
+func stripFencedCode(text string) string {
+	var out []string
+	inFence := false
+	for _, line := range strings.Split(text, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "```") {
+			inFence = !inFence
+			continue
+		}
+		if inFence {
+			continue
+		}
+		out = append(out, line)
+	}
+	return strings.Join(out, "\n")
 }
 
 func RunSensitiveConfig(cfg Config) error {
