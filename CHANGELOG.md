@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.4 - 2026-06-16
+
+### Changed
+
+- Add package-level `test` and `version` scripts so npm and CLI checks use the
+  same release version.
+
 ## v0.1.3 - 2026-06-12
 
 ### Changed
