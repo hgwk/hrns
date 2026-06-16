@@ -13,7 +13,7 @@ From another project:
 ```sh
 go install github.com/hgwk/hrns/cmd/hrns@latest
 hrns version
-hrns init --docs --instructions
+hrns init --docs
 hrns list
 hrns list --json
 hrns explain verify-line-count
@@ -72,12 +72,15 @@ Create a JSON document proposal template with:
 hrns init --docs
 ```
 
-Inject a short `AGENTS.md` / `CLAUDE.md` prelude and create the home-local
-instruction body with:
+`hrns init` also injects a short `AGENTS.md` / `CLAUDE.md` prelude and creates
+the home-local instruction body:
 
 ```sh
-hrns init --instructions
+hrns init
 ```
+
+Use `--no-instructions` only when a repository intentionally does not want hrns
+agent guide pointers.
 
 The CLI also reads `package.json#hrns`. `hrns.config.json` wins over
 `package.json#hrns`.

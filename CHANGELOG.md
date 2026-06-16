@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.5 - 2026-06-16
+
+### Changed
+
+- Make `hrns init` install `AGENTS.md` / `CLAUDE.md` pointers and the
+  home-local audit guide by default.
+- Add `hrns init --no-instructions` for repos that intentionally skip agent
+  guide pointers.
+
 ## v0.1.4 - 2026-06-16
 
 ### Changed

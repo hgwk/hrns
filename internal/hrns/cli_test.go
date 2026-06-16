@@ -148,6 +148,8 @@ func TestRunListTarget(t *testing.T) {
 
 func TestRunInitTarget(t *testing.T) {
 	dir := t.TempDir()
+	home := t.TempDir()
+	t.Setenv("HRNS_HOME", filepath.Join(home, ".hrns"))
 	if err := Run([]string{"init", "--target", dir, "--profile", "go"}); err != nil {
 		t.Fatalf("Run(init --target): %v", err)
 	}
@@ -157,6 +159,33 @@ func TestRunInitTarget(t *testing.T) {
 	}
 	if !strings.Contains(string(data), `"cmd"`) {
 		t.Fatalf("expected go profile config, got %s", data)
+	}
+	for _, file := range []string{"AGENTS.md", "CLAUDE.md"} {
+		pointer, err := os.ReadFile(filepath.Join(dir, file))
+		if err != nil {
+			t.Fatalf("expected %s: %v", file, err)
+		}
+		if !strings.Contains(string(pointer), "@"+filepath.Join(home, ".hrns", "audit-guide.md")) {
+			t.Fatalf("%s missing home-local pointer: %s", file, pointer)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(home, ".hrns", "audit-guide.md")); err != nil {
+		t.Fatalf("expected home-local audit guide: %v", err)
+	}
+}
+
+func TestRunInitCanSkipInstructions(t *testing.T) {
+	dir := t.TempDir()
+	home := t.TempDir()
+	t.Setenv("HRNS_HOME", filepath.Join(home, ".hrns"))
+	if err := Run([]string{"init", "--target", dir, "--no-instructions"}); err != nil {
+		t.Fatalf("Run(init --no-instructions): %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "AGENTS.md")); !os.IsNotExist(err) {
+		t.Fatalf("AGENTS.md should not be created with --no-instructions, stat err=%v", err)
+	}
+	if _, err := os.Stat(filepath.Join(home, ".hrns", "audit-guide.md")); !os.IsNotExist(err) {
+		t.Fatalf("audit guide should not be created with --no-instructions, stat err=%v", err)
 	}
 }
 

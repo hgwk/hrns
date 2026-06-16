@@ -38,7 +38,7 @@ var allAudits = []string{
 	"verify-elegance-review",
 }
 
-var Version = "0.1.4"
+var Version = "0.1.5"
 
 func Run(args []string) error {
 	cmd := "audit"

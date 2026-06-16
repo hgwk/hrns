@@ -10,7 +10,7 @@ Usage:
   hrns audit [--all] [--with-ldgr] [--target PATH]
   hrns run <audit-name> [--target PATH]
   hrns explain <audit-name> [--target PATH]
-  hrns init [--docs] [--instructions] [--profile node|go|rust|next] [--target PATH]
+  hrns init [--docs] [--no-instructions] [--profile node|go|rust|next] [--target PATH]
   hrns list [--verbose] [--json] [--target PATH]
   hrns version
 
@@ -34,7 +34,7 @@ func printCommandHelp(cmd string) {
 	case "explain":
 		fmt.Println("usage: hrns explain <audit-name> [--target PATH]")
 	case "init":
-		fmt.Println("usage: hrns init [--docs] [--instructions] [--profile node|go|rust|next] [--target PATH]")
+		fmt.Println("usage: hrns init [--docs] [--no-instructions] [--profile node|go|rust|next] [--target PATH]")
 	case "docs:check":
 		fmt.Println("usage: hrns docs:check [proposal-json] [--target PATH]")
 	case "docs:index":

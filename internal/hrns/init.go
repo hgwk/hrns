@@ -19,7 +19,7 @@ func initCommand(args []string) error {
 			return err
 		}
 	}
-	if contains(args, "--instructions") {
+	if !contains(args, "--no-instructions") {
 		if err := initInstructions(); err != nil {
 			return err
 		}
