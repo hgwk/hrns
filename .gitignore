@@ -4,3 +4,7 @@ coverage/
 .DS_Store
 *.tgz
 .hrns/docs-index.json
+
+# Local agent instruction includes
+/AGENTS.md
+/CLAUDE.md
