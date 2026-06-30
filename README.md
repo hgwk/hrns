@@ -1,17 +1,45 @@
 # hrns
 
-Portable repository audit and test harness CLI.
+[![npm version](https://img.shields.io/npm/v/@hgwk/hrns.svg)](https://www.npmjs.com/package/@hgwk/hrns)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Portable repository audit and document-gate CLI for source, docs, config, and
+project hygiene checks.
 
 This package started as the reusable audit harness extracted from Agent-Zero.
 The primary implementation is a Go CLI that runs from a consumer repository
 root and executes packaged checks against that repository.
 
-## Usage
+## Requirements
+
+- macOS or Linux
+- Go is optional for source installs; npm installs download the native binary
+  from GitHub Releases
+
+## Install
+
+```sh
+npm install -g @hgwk/hrns
+```
+
+Or install from source with Go:
+
+```sh
+go install github.com/hgwk/hrns/cmd/hrns@latest
+```
+
+Make sure `$(go env GOPATH)/bin` is on your `$PATH`. macOS/Linux:
+
+```sh
+export PATH="$(go env GOPATH)/bin:$PATH"
+```
+
+## Quick Start
 
 From another project:
 
 ```sh
-go install github.com/hgwk/hrns/cmd/hrns@latest
+cd /path/to/project
 hrns version
 hrns init --docs
 hrns list
@@ -45,7 +73,7 @@ npm run list:json
 npm run audit:ldgr
 ```
 
-## Companion Tool Roles
+## Companion Suite
 
 - `cduo doctor` checks pair-agent runtime setup and project hook readiness.
 - `ldgr verify` checks ledger lifecycle, audit, worklog, and Git evidence.
@@ -263,3 +291,21 @@ development.
 
 Project-specific defaults belong in `hrns.config.json` or `package.json#hrns`
 instead of being hard-coded in each verifier.
+
+## Release Flow
+
+- GitHub repository: `hgwk/hrns`
+- npm package: `@hgwk/hrns`
+- GitHub Releases hosts platform-specific Go binaries
+- `.github/workflows/release.yml` builds and publishes binaries on version tags
+- The npm package is published from GitHub Actions through npm Trusted
+  Publishing (OIDC), not a long-lived `NPM_TOKEN`
+- The npm package is a thin wrapper that downloads the appropriate binary from
+  GitHub Releases on install
+- Release tags must match `internal/hrns/cli.go` and `package.json`
+- npm Trusted Publisher configuration:
+  - Publisher: `GitHub Actions`
+  - Organization or user: `hgwk`
+  - Repository: `hrns`
+  - Workflow filename: `release.yml`
+  - Environment name: empty

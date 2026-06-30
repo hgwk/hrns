@@ -57,7 +57,7 @@ jobs:
           node -c bin/install.js
           sh -n bin/hrns
           npm run list:json >/tmp/hrns-list.json
-          npm install -g @hgwk/ldgr
+          go install github.com/hgwk/ldgr@latest
           ldgr init --target . --home /tmp/ldgr-home
           npm run audit:ldgr
           npm pack --dry-run

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.9 - 2026-06-30
+
+### Fixed
+
+- Preserve npm binary entries during publish by using package-relative bin
+  paths.
+- Keep release smoke independent of the npm `ldgr` package metadata cache by
+  installing `ldgr` from source for the `audit:ldgr` check.
+
 ## v0.1.8 - 2026-06-16
 
 ### Changed
